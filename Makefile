@@ -1,9 +1,7 @@
-asm: bin/asm
+asm:
+	mkdir -p bin && rm -f ./bin/arm    && cd asm    && make && cp bin/asm    ../bin && cd ..
 
-bin/asm:
-	mkdir -p bin && cd asm    && make && cp bin/asm    ../bin && cd ..
+disasm:
+	mkdir -p bin && rm -f ./bin/disarm && cd disasm && make && cp bin/disasm ../bin && cd ..	
 
-disasm: bin/disasm
-
-bin/disasm:
-	mkdir -p bin && cd disasm && make && cp bin/disasm ../bin && cd ..	
+.PHONY: disasm asm

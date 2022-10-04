@@ -17,14 +17,8 @@ int main (int argc, char *argv[])
         fprintf (stderr, "Usage: ./asm <input file> [<output file>]\n");
         return -1;
     }
-    else if (argc == 3) 
-    {
-        out_filename = argv[2];
-    }
-    else
-    {
-        out_filename = "a.bin";
-    }
+    else if (argc == 3) out_filename = argv[2];
+    else                out_filename = "a.bin";
 
     FILE *in_file  = fopen (argv[1],      "r" );
     FILE *out_file = fopen (out_filename, "wb");

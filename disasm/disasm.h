@@ -1,0 +1,25 @@
+#ifndef DISASM_H
+#define DISASM_H
+
+#include "../common/exec.h"
+#include "../file/file.h"
+#include "../common/common.h"
+
+const char VERSION = 1;
+typedef header_v1_t header_t;
+
+const int DOUBLE_PRECISION = 20;
+const int RESERVED_BUF_SIZE = (MAX_OPCODE_LEN + 1 + DOUBLE_PRECISION + 1) + 7; // command + " " + double + \n + reserve
+
+enum class DISASM_ERRORS
+{
+    OK      = 0,
+    NOMEM,
+    BAD_BINARY,
+};
+
+DISASM_ERRORS disassembly (char **out, size_t *buf_size, const void *source, size_t code_size);
+
+int translate_command (char *buf, const void *code, size_t *code_shift);
+
+#endif

@@ -1,5 +1,4 @@
 *.bin
-*.asm
 *.out
 *.o
 obj

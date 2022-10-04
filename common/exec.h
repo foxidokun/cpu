@@ -2,6 +2,7 @@
 #define EXEC_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef unsigned char opcode_t;
@@ -50,5 +51,18 @@ const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "out",
     "inp"
     };
+
+enum class BIN_ERROR
+{
+    OK = 0,
+    BAD_SIGNATURE,
+    BAD_HASH,
+    BAD_SIZE,
+    BAD_VERSION,
+};
+
+BIN_ERROR verify_binary (const void *bin, size_t bin_size, unsigned char version);
+
+const char *bin_strerror (BIN_ERROR err);
 
 #endif
