@@ -10,4 +10,4 @@ cpu:
 	mkdir -p bin && rm -f ./bin/cpu    && cd cpu    && make && cp bin/cpu    ../bin && cd ..	
 
 
-.PHONY: disasm asm
+.PHONY: disasm asm cpu
