@@ -8,14 +8,14 @@ BIN_ERROR verify_binary (const void *bin, size_t bin_size, unsigned char version
 
     if (bin_size < sizeof (pre_header_t))              return BIN_ERROR::BAD_SIZE;
 
-    if (((pre_header_t *)bin)->signature != SIGNATURE) return BIN_ERROR::BAD_SIGNATURE;
-    if (((pre_header_t *)bin)->version   != version)   return BIN_ERROR::BAD_VERSION;
+    if (((const pre_header_t *)bin)->signature != SIGNATURE) return BIN_ERROR::BAD_SIGNATURE;
+    if (((const pre_header_t *)bin)->version   != version)   return BIN_ERROR::BAD_VERSION;
 
-    bin = (char *) bin + sizeof (pre_header_t);
+    bin = (const char *) bin + sizeof (pre_header_t);
 
     if (version == 1)
     {
-        header_v1_t *header = (header_v1_t *) bin;
+        const header_v1_t *header = (const header_v1_t *) bin;
         if (bin_size != sizeof (header_v1_t) + sizeof (pre_header_t) + header->code_size)
         {
             return BIN_ERROR::BAD_SIZE;

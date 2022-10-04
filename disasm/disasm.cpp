@@ -57,8 +57,6 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     assert (buf  != nullptr && "pointer can't be null");
     assert (code != nullptr && "pointer can't be null");
 
-    char *DEBUG_BUF = buf;
-
     unsigned int cnt = 0;
     int tmp_cnt      = 0;
     opcode_t cmd     = *(const opcode_t *) code;

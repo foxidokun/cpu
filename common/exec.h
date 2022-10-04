@@ -29,12 +29,13 @@ enum OPCODE
     ADD,   //2,
     SUB,   //3,
     DIV,   //4,
-    POW,   //5
-    SIN,   //6,
-    INC,   //7,
-    DEC,   //8,
-    OUT,   //9,
-    INP,  //10,
+    MUL,   //5
+    POW,   //6
+    SIN,   //7,
+    INC,   //8,
+    DEC,   //9,
+    OUT,  //10,
+    INP,  //11,
     _OPCODE_CNT_
 };
 
@@ -44,6 +45,7 @@ const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "add",
     "sub",
     "div",
+    "mul",
     "pow",
     "sin",
     "inc",
