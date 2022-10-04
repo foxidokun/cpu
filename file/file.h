@@ -1,7 +1,7 @@
 #ifndef FILE_H
 #define FILE_H
 #include <stdio.h>
-#include "../headers/common.h"
+#include "../common/common.h"
 
 #define _UNWRAP_NULL(cond)     { if ((cond) == NULL)  { return NULL;  } }
 #define _UNWRAP_NULL_ERR(cond) { if ((cond) == NULL)  { return ERROR; } }

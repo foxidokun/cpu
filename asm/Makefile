@@ -4,7 +4,7 @@ PROJ   = asm
 BINDIR = bin
 OBJDIR = obj
 
-_DEPS = asm.h ../stack/stack.h ../stack/log.h ../stack/hash.h ../headers/exec.h ../headers/common.h
+_DEPS = asm.h ../stack/stack.h ../stack/log.h ../stack/hash.h ../common/exec.h ../common/common.h
 DEPS = $(patsubst %,./%,$(_DEPS))
 
 _OBJ = main.o asm.o

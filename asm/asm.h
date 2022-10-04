@@ -1,7 +1,7 @@
 #ifndef ASM_H
 #define ASM_H
 
-#include "../headers/exec.h"
+#include "../common/exec.h"
 #include "../file/file.h"
 #include "../common/common.h"
 
@@ -28,7 +28,7 @@ ASM_ERRORS compile (struct code_t *code, const text *source);
 
 int translate_command (void *const buf, const char *line);
 
-int write_binary (FILE *stream, const struct code_t *code); 
+int write_binary (FILE *stream, const struct code_t *code);
 
 
 #endif // ASM_H
