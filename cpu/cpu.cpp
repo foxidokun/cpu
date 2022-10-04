@@ -46,16 +46,16 @@ CPU_ERRORS run_binary (const void *binary, size_t binary_size)
 
 #define _ARTHM(opcode, oper)                \
 case opcode:                                \
-    _STK_UNWRAP (stack_pop (&stk, &op1));   \
     _STK_UNWRAP (stack_pop (&stk, &op2));   \
+    _STK_UNWRAP (stack_pop (&stk, &op1));   \
     op1 = op1 oper op2;                     \
     _STK_UNWRAP (stack_push(&stk, &op1));   \
     break;                                  \
 
 #define _TWO_EL_FUNC(opcode, func)          \
 case opcode:                                \
-    _STK_UNWRAP (stack_pop (&stk, &op1));   \
     _STK_UNWRAP (stack_pop (&stk, &op2));   \
+    _STK_UNWRAP (stack_pop (&stk, &op1));   \
     op1 = func (op1, op2);                  \
     _STK_UNWRAP (stack_push(&stk, &op1));   \
     break; 
