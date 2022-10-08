@@ -19,8 +19,13 @@ CPU_ERRORS run_binary (const void *binary, size_t binary_size)
     binary = (const char *)binary + sizeof (pre_header_t) + sizeof (header_t);
     size_t code_size  = ((const header_t *)binary)[-1].code_size;
 
-    CPU_ERRORS exec_res = execute (binary, code_size);
+    cpu_t *cpu = (cpu_t *) calloc (1, sizeof (cpu_t));
+    if (cpu == nullptr) { return CPU_ERRORS::NOMEM; }
+    cpu_init (cpu, binary, code_size);
 
+    CPU_ERRORS exec_res = execute (cpu);
+
+    free (cpu);
     return exec_res;
 }
 
@@ -58,38 +63,29 @@ case opcode:                                     \
     _STK_UNWRAP (stack_push(&cpu->stk, &op1));   \
     break; 
 
-CPU_ERRORS execute (const void *code, size_t code_size)
+CPU_ERRORS execute (cpu_t *const cpu)
 {
-    assert (code != nullptr && "pointer can't be null");
+    assert (cpu != nullptr && "pointer can't be null");
 
-    int cmd = 0, op1 = 0, op2 = 0;
-    bool m_flag = false, r_flag = false, i_flag = false;
+    const opcode_t *instruct = nullptr;
+    int op1 = 0, op2 = 0;
 
-    cpu_t *cpu = (cpu_t *) calloc (1, sizeof (cpu_t));
-    if (cpu == nullptr) { return CPU_ERRORS::NOMEM; }
-    cpu_init (cpu, code);
-
-    while (code_size > 0)
+    while (cpu->code_size > 0)
     {
-        cmd = ((const opcode_t *) cpu->code)->opcode;
-        m_flag   = ((const opcode_t *) code)->m;
-        r_flag   = ((const opcode_t *) code)->r;
-        i_flag   = ((const opcode_t *) code)->i;
-        cpu->code += sizeof (opcode_t);
-        code_size -= sizeof (opcode_t);
+        instruct = ((const opcode_t *) cpu->code);
+        cpu->code      += sizeof (opcode_t);
+        cpu->code_size -= sizeof (opcode_t);
 
-        log (log::DBG, "Decoding opcode %d (%s)", cmd, COMMAND_NAMES[cmd]);
+        log (log::DBG, "Decoding opcode %d (%s)", instruct->opcode, COMMAND_NAMES[instruct->opcode]);
 
-        switch (cmd) {
+        switch (instruct->opcode) {
             case HLT:
-                free (cpu);
                 return CPU_ERRORS::OK;
                 break;
 
             case PUSH:
-                _STK_UNWRAP (stack_push (&cpu->stk, cpu->code));
-                cpu->code += sizeof (int);
-                code_size -= sizeof (int);
+                op1 = extract_arg (cpu, instruct);
+                _STK_UNWRAP (stack_push (&cpu->stk, &op1));
                 break;
 
             _ARTHM(ADD, +)
@@ -106,7 +102,6 @@ CPU_ERRORS execute (const void *code, size_t code_size)
                 break;
 
             case INP:
-    
                 printf ("Stupid programmer decided to ask you for a number at runtime: \n");
                 scanf ("%i", &op1);
                 _STK_UNWRAP (stack_push (&cpu->stk, &op1));
@@ -121,12 +116,40 @@ CPU_ERRORS execute (const void *code, size_t code_size)
     return CPU_ERRORS::OK;
 }
 
-CPU_ERRORS cpu_init (cpu_t *cpu, const void* code)
+int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
+{
+    assert (cpu      != nullptr && "pointer can't be null");
+    assert (instruct != nullptr && "pointer can't be null");
+    
+    int arg = 0;
+
+    if (instruct->i)
+    {
+        arg += *(const int *) cpu->code;
+        cpu->code      += sizeof (int);
+        cpu->code_size -= sizeof (int);
+    }
+    if (instruct->r)
+    {
+        arg += cpu->regs[*(const unsigned char *) cpu->code];
+        cpu->code      += sizeof (unsigned char);
+        cpu->code_size -= sizeof (unsigned char);
+    }
+    if (instruct->m)
+    {
+        arg = cpu->ram[arg];
+    }
+
+    return arg;
+}
+
+CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
 {
     assert (cpu  != nullptr && "pointer can't be null");
     assert (code != nullptr && "pointer can't be null");
 
-    cpu->code = (const char *) code;
+    cpu->code      = (const char *) code;
+    cpu->code_size = code_size;
     stack_ctor (&cpu->stk, sizeof (int));
 
     return CPU_ERRORS::OK;
