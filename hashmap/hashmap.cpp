@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../common/common.h"
+#include "../stack/hash.h"
 #include "hashmap.h"
 
 hashmap *hashmap_create (size_t capacity, size_t max_key_size, size_t max_val_size,
-                    long unsigned int hash(const void *), int (*comp)(const void *, const void *))
+                    hash_t hash(const void *, size_t), int (*comp)(const void *, const void *))
 {
     assert (hash != NULL && "function can't be NULL");
     assert (comp != NULL && "function can't be NULL");
@@ -83,7 +84,7 @@ int hashmap_insert (hashmap *map, const void *key, size_t key_size, const void *
 
     if (map->allocated == map->used) return ERROR; // OOM
 
-    size_t id = map->hash (key) % map->allocated;
+    size_t id = map->hash (key, map->max_key_size) % map->allocated;
 
     // ID already in use with different key
     if (check_bit (map->flags, id) && map->comp (key, (char *) map->keys + id*map->max_key_size))
@@ -108,7 +109,7 @@ void *hashmap_get (const hashmap *map, const void *key)
     assert (map != NULL && "pointer can't be NULL");
     assert (key != NULL && "pointer can't be NULL");
 
-    size_t id = map->hash (key) % map->allocated;
+    size_t id = map->hash (key, map->max_key_size) % map->allocated;
 
     if (check_bit (map->flags, id) && !map->comp (key, (char *) map->keys + id*map->max_key_size))
     {

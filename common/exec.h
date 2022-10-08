@@ -40,21 +40,35 @@ enum OPCODE
     DEC,   //8,
     OUT,   //9,
     INP,  //10,
+    JMP,  //11
+    JA,   //12
+    JAE,  //13
+    JB,   //14
+    JBE,  //15
+    JE,   //16
+    JNE,  //17
     _OPCODE_CNT_
 };
 
 const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "halt",
     "push",
-    "pop",
-    "add",
-    "sub",
-    "div",
-    "mul",
-    "inc",
-    "dec",
-    "out",
-    "inp"
+    "pop" ,
+    "add" ,
+    "sub" ,
+    "div" ,
+    "mul" ,
+    "inc" ,
+    "dec" ,
+    "out" ,
+    "inp" ,
+    "jmp" ,
+    "ja"  ,
+    "jae" ,
+    "jb"  ,
+    "jbe" ,
+    "je"  ,
+    "jne"
     };
 
 enum class BIN_ERROR

@@ -19,7 +19,7 @@ struct hashmap
     bitflags *flags;         /// Bool bit flags (is index used or not)
     void     *keys;          /// Keys array
     void     *values;        /// Array of pointers to values
-    long unsigned int (*hash)(const void *); /// Hash function Key -> uint
+    long unsigned int (*hash)(const void *, size_t); /// Hash function Key, Key size -> uint
     int (*comp)(const void *, const void *); /// Comparator for keys like strcmp (0 if equal)
 };
 
@@ -35,7 +35,7 @@ struct hashmap
  * @return     Pointer to allocated memory or NULL in case of OOM
  */
 hashmap *hashmap_create (size_t capacity, size_t max_key_size, size_t max_val_size,
-                    long unsigned int hash(const void *), int (*comp)(const void *, const void *));
+                    long unsigned int hash(const void *, size_t), int (*comp)(const void *, const void *));
 
 /// Free memmory occupied by map
 void hashmap_free (hashmap *map);

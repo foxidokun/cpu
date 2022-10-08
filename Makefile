@@ -9,5 +9,7 @@ disasm:
 cpu:
 	mkdir -p bin && rm -f ./bin/cpu    && cd cpu    && make && cp bin/cpu    ../bin && cd ..	
 
+clean:
+	find . -name "*.o" -delete
 
-.PHONY: disasm asm cpu
+.PHONY: disasm asm cpu clean

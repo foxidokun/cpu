@@ -40,4 +40,5 @@ int main (int argc, char *argv[])
 
     fclose (out_file);
     free_text (source);
+    free (code.mcode);
 }
