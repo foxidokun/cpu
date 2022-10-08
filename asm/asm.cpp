@@ -68,6 +68,7 @@ int translate_command (void *const buf, const char *line)
     int cmd_len                = 0;
     int ret_code               = 0;
     bool command_not_found     = true;
+    opcode_t *instr_ptr        = nullptr;
 
     ret_code = sscanf (line, "%s%n", cmd, &cmd_len);
     if (ret_code != 1) return ERROR;
@@ -77,19 +78,32 @@ int translate_command (void *const buf, const char *line)
     {
         if (strcasecmp (cmd, COMMAND_NAMES[i]) == 0)
         {
+            instr_ptr = (opcode_t *) buf_c;
+
             #pragma GCC diagnostic push
             #pragma GCC diagnostic ignored "-Wconversion"
             assert (i < 1<<OPCODE_BIT_SIZE && "Invalid instruction => overflow");
-            ((opcode_t *) buf_c)->opcode = i;
+            instr_ptr->opcode = i;
             #pragma GCC diagnostic pop
 
             buf_c += sizeof (opcode_t);
 
-            if (i == PUSH)
+            switch (i)
             {
-                ret_code = translate_arg (((opcode_t *) buf_c) - 1, line, buf_c);
-                if (ret_code == ERROR) return ERROR;
-                else buf_c += ret_code;
+                case PUSH:
+                    ret_code = translate_arg (instr_ptr, line, buf_c);
+                    if (ret_code == ERROR) return ERROR;
+                    else buf_c += ret_code;
+                    break;
+
+                case POP:
+                    ret_code = translate_arg (((opcode_t *) buf_c) - 1, line, buf_c);
+                    if (ret_code == ERROR) return ERROR;
+                    else if (instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) return ERROR;
+                    else buf_c += ret_code;
+                    break;
+
+                default: break;
             }
 
             command_not_found = false;
@@ -142,7 +156,7 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
     for (int i = 0; i < 3; ++i)
     {
         _SKIP_SPACE
-        if (isdigit (arg_str[0]))
+        if (isdigit (arg_str[0]) || arg_str[0] == '-')
         {
             if (opcode->i) return ERROR;
             opcode->i   = true;
@@ -185,7 +199,7 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
     }
     if (opcode->r)
     {
-        assert (reg_num <= CHAR_MAX && reg_num > 0 && "Invalid type casting");
+        assert (reg_num <= CHAR_MAX && reg_num >= 0 && "Invalid type casting");
         *(unsigned char *) buf = (unsigned char) reg_num;
         buf = (char *) buf + sizeof (unsigned char);
         arg_bin_len += (int) sizeof (unsigned char);

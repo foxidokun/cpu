@@ -69,6 +69,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
 
     const opcode_t *instruct = nullptr;
     int op1 = 0, op2 = 0;
+    int *op_ptr;
 
     while (cpu->code_size > 0)
     {
@@ -84,8 +85,18 @@ CPU_ERRORS execute (cpu_t *const cpu)
                 break;
 
             case PUSH:
-                op1 = extract_arg (cpu, instruct);
+                op1 = extract_arg_push (cpu, instruct);
                 _STK_UNWRAP (stack_push (&cpu->stk, &op1));
+                break;
+
+            case POP:
+                op_ptr = extract_arg_pop (cpu, instruct);
+                if (op_ptr == nullptr)
+                {
+                    log (log::ERR, "Invalid pop argument");
+                    return CPU_ERRORS::SYNTAX;
+                }
+                _STK_UNWRAP (stack_pop (&cpu->stk, op_ptr));
                 break;
 
             _ARTHM(ADD, +)
@@ -116,7 +127,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
     return CPU_ERRORS::OK;
 }
 
-int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
+int extract_arg_push (cpu_t *cpu, const opcode_t *const instruct)
 {
     assert (cpu      != nullptr && "pointer can't be null");
     assert (instruct != nullptr && "pointer can't be null");
@@ -141,6 +152,32 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
     }
 
     return arg;
+}
+
+int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
+{
+    assert (cpu      != nullptr && "pointer can't be null");
+    assert (instruct != nullptr && "pointer can't be null");
+    
+    int *arg_ptr = nullptr;
+    opcode_t instruct_copy = *instruct;
+
+    if (instruct -> m)
+    {
+        instruct_copy.m = false;
+        arg_ptr = &cpu->ram[extract_arg_push (cpu, &instruct_copy)];
+        instruct_copy.m = true;
+    }
+    else
+    {
+        if (instruct->i) return nullptr;
+        
+        arg_ptr = &cpu->regs[*(const unsigned char *) cpu->code];
+        cpu->code      += sizeof (unsigned char);
+        cpu->code_size -= sizeof (unsigned char);
+    }
+
+    return arg_ptr;
 }
 
 CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
