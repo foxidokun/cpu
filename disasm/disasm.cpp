@@ -73,11 +73,11 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     switch (cmd.opcode)
     {
         case PUSH:
-            sprintf (buf, " %.*lg%n", DOUBLE_PRECISION, *(const double *)code, &tmp_cnt);
+            sprintf (buf, " %d%n", *(const int *)code, &tmp_cnt);
             assert (tmp_cnt >= 0 && "%n less than zero");
             cnt += (unsigned) tmp_cnt;
             buf += (unsigned) tmp_cnt;
-            *code_shift += sizeof (double);
+            *code_shift += sizeof (int);
             break;
         
         default:

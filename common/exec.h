@@ -5,17 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-const int OPCODE_BIT_SIZE = 5;
+#include "config.h"
 
 struct opcode_t {
+    unsigned char opcode: OPCODE_BIT_SIZE;
     unsigned char m: 1;
     unsigned char r: 1;
     unsigned char i: 1;
-    unsigned char opcode: OPCODE_BIT_SIZE;
 };
-
-const uint64_t SIGNATURE = 0x1000DEAD7;
-const size_t MAX_OPCODE_LEN = 4;
 
 struct pre_header_t
 {
@@ -37,12 +34,10 @@ enum OPCODE
     SUB,   //3,
     DIV,   //4,
     MUL,   //5
-    POW,   //6
-    SIN,   //7,
-    INC,   //8,
-    DEC,   //9,
-    OUT,  //10,
-    INP,  //11,
+    INC,   //7,
+    DEC,   //8,
+    OUT,   //9,
+    INP,  //10,
     _OPCODE_CNT_
 };
 
@@ -53,8 +48,6 @@ const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "sub",
     "div",
     "mul",
-    "pow",
-    "sin",
     "inc",
     "dec",
     "out",

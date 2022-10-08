@@ -61,11 +61,11 @@ int translate_command (void *const buf, const char *line)
     assert (buf  != nullptr && "pointer can't be null");
     assert (line != nullptr && "pointer can't be null");
     
-    char *buf_c = (char *) buf;
     char cmd[MAX_OPCODE_LEN+1] = "";
-    int cmd_len  = 0;
-    int ret_code = 0;
-    bool syntax_error = true;
+    char *buf_c                = (char *) buf;
+    int cmd_len                = 0;
+    int ret_code               = 0;
+    bool syntax_error          = true;
 
     ret_code = sscanf (line, "%s%n", cmd, &cmd_len);
     if (ret_code != 1) return ERROR;
@@ -86,13 +86,13 @@ int translate_command (void *const buf, const char *line)
             if (i == PUSH)
             {
                 ((opcode_t *) buf_c)->i = true;
-                double arg = 0.0;
+                int arg = 0.0;
                 
-                ret_code = sscanf (line, "%lg", &arg);
+                ret_code = sscanf (line, "%i", &arg);
                 if (ret_code != 1) return ERROR;
 
-                * ((double *) buf_c) = arg;
-                buf_c += sizeof (double);
+                * ((int *) buf_c) = arg;
+                buf_c += sizeof (int);
             }
 
             syntax_error = false;
