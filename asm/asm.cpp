@@ -19,42 +19,47 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
     code->pre_header.header_version   = HEADER_VERSION;
     code->pre_header.binary_version   = BINARY_VERSION;
     code->header.hash                 = 0;
-    code->header.code_size            = 0;
     code->mcode                       = calloc (CODE_BUF_RESERVED, 1);
     code->mcode_capacity              = CODE_BUF_RESERVED;
     if (code->mcode == nullptr) { return ASM_ERRORS::NOMEM; }
 
     code->name_table                  = hashmap_create (LABEL_START_CAPACITY, MAX_LABEL_LEN+1,
                                                 sizeof (unsigned int), djb2, _strcmp_on_void);
+    if (code->name_table == nullptr) { return ASM_ERRORS::NOMEM; }
 
-    char *mcode_ptr = (char *) code->mcode;
-    ssize_t write_len = 0;
-
-    for (unsigned int i = 0; i < source->n_lines; ++i)
+    for (int n_pass = 0; n_pass < NUM_OF_PASSES; ++n_pass)
     {
-        if (source->lines[i].len <= 1 || source->lines[i].content[0] == ';')
+        code->header.code_size            = 0;
+
+        char *mcode_ptr = (char *) code->mcode;
+        ssize_t write_len = 0;
+
+        for (unsigned int i = 0; i < source->n_lines; ++i)
         {
-            continue;
-        }
+            if (source->lines[i].len <= 1 || source->lines[i].content[0] == ';')
+            {
+                continue;
+            }
 
-        write_len = translate_command (mcode_ptr, source->lines[i].content, code);
-        if (write_len == -1)
-        {
-            log (log::ERR, "Failed to parse command on line %d", i+1);
-            return ASM_ERRORS::SYNTAX;
-        }
+            write_len = translate_command (mcode_ptr, source->lines[i].content, code);
+            if (write_len == -1)
+            {
+                log (log::ERR, "Failed to parse command on line %d", i+1);
+                return ASM_ERRORS::SYNTAX;
+            }
 
-        mcode_ptr              += (size_t) write_len;
-        code->header.code_size += (size_t) write_len;
+            mcode_ptr              += (size_t) write_len;
+            code->header.code_size += (size_t) write_len;
 
-        if (code->header.code_size > code->mcode_capacity - CODE_BUF_RESERVED)
-        {
-            void *tmp_ptr = realloc (code->mcode, 2 * code->mcode_capacity);
-            if (tmp_ptr == nullptr) { return ASM_ERRORS::NOMEM; }
+            if (code->header.code_size > code->mcode_capacity - CODE_BUF_RESERVED)
+            {
+                void *tmp_ptr = realloc (code->mcode, 2 * code->mcode_capacity);
+                if (tmp_ptr == nullptr) { return ASM_ERRORS::NOMEM; }
 
-            mcode_ptr = (mcode_ptr - (char *)code->mcode) + (char *)tmp_ptr;
-            code->mcode = tmp_ptr;
-            code->mcode_capacity *= 2;
+                mcode_ptr = (mcode_ptr - (char *)code->mcode) + (char *)tmp_ptr;
+                code->mcode = tmp_ptr;
+                code->mcode_capacity *= 2;
+            }
         }
     }
 

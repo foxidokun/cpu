@@ -8,6 +8,7 @@
 
 const char BINARY_VERSION = 3;
 const char HEADER_VERSION = 1;
+const int NUM_OF_PASSES   = 2;
 
 typedef header_v1_t header_t;
 const int CODE_BUF_RESERVED = 2 * (sizeof (opcode_t) + sizeof (double));
