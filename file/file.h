@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include "../common/common.h"
 
-#define _UNWRAP_NULL(cond)     { if ((cond) == NULL)  { return NULL;  } }
-#define _UNWRAP_NULL_ERR(cond) { if ((cond) == NULL)  { return ERROR; } }
-#define _UNWRAP_ERR(expr)      { if ((expr) == ERROR) { return ERROR; } }
-#define _UNWRAP_ERR_NULL(cond) { if ((cond) == ERROR) { return NULL;  } }
 /**
  * @brief      File content 
  */
