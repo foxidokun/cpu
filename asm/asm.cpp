@@ -148,8 +148,16 @@ int translate_command (void *const buf, const char *line, code_t *code)
                 case JBE:
                 case JE:
                 case JNE:
-                    if (sscanf (line, "%s", cmd) != 1) { return ERROR; }
-                    buf_c += translate_label (instr_ptr, cmd, buf_c, code->name_table);
+                    ret_code = translate_arg (instr_ptr, line, buf_c);
+                    if (ret_code == ERROR)
+                    {
+                        if (sscanf (line, "%s", cmd) != 1) { return ERROR; }
+                        buf_c += translate_label (instr_ptr, cmd, buf_c, code->name_table);
+                    }
+                    else
+                    {
+                        buf_c += ret_code;
+                    }
                     break;
 
                 default: break;
@@ -239,7 +247,6 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
         }
         else if (arg_str[0] != '\0' && arg_len != 0)
         {
-            log (log::DBG, "Failed with str '%s', char: %d", arg_str, arg_str[0]);
             return ERROR;
         }
 
@@ -271,6 +278,10 @@ int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap
     assert (line  != nullptr && "pointer can't be null");
     assert (buf   != nullptr && "pointer can't be null");
     assert (name_table != nullptr && "pointer can't be null");
+
+    instr->m = false;
+    instr->r = false;
+    instr->i = true;
 
     unsigned int *buf_ui  = (unsigned int *) buf;
     unsigned int *jmp_pos = (unsigned int *) hashmap_get(name_table, line);
