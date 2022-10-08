@@ -71,15 +71,21 @@ int translate_command (void *const buf, const char *line)
     if (ret_code != 1) return ERROR;
     line += cmd_len;
 
-    for (int i = 0; i < _OPCODE_CNT_; ++i)
+    for (unsigned int i = 0; i < _OPCODE_CNT_; ++i)
     {
         if (strcasecmp (cmd, COMMAND_NAMES[i]) == 0)
         {
-            * ((opcode_t *) buf_c) = (opcode_t) i;
+            #pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Wconversion"
+            assert (i < 1<<OPCODE_BIT_SIZE && "Invalid instruction => overflow");
+            ((opcode_t *) buf_c)->opcode = i;
+            #pragma GCC diagnostic pop
+
             buf_c += sizeof (opcode_t);
 
             if (i == PUSH)
             {
+                ((opcode_t *) buf_c)->i = true;
                 double arg = 0.0;
                 
                 ret_code = sscanf (line, "%lg", &arg);

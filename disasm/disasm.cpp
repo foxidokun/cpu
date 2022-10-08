@@ -60,17 +60,17 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     unsigned int cnt = 0;
     int tmp_cnt      = 0;
     opcode_t cmd     = *(const opcode_t *) code;
-    if (cmd >= _OPCODE_CNT_) return -1;
+    if (cmd.opcode >= _OPCODE_CNT_) return -1;
 
-    strcpy (buf, COMMAND_NAMES[cmd]);
-    unsigned int command_len = (unsigned int) strlen (COMMAND_NAMES[cmd]);
+    strcpy (buf, COMMAND_NAMES[cmd.opcode]);
+    unsigned int command_len = (unsigned int) strlen (COMMAND_NAMES[cmd.opcode]);
     buf += command_len;
     cnt += command_len;
     code = (const char *) code + sizeof (opcode_t);
     *code_shift = sizeof (opcode_t); 
 
     // Commands that require special actions
-    switch (cmd)
+    switch (cmd.opcode)
     {
         case PUSH:
             sprintf (buf, " %.*lg%n", DOUBLE_PRECISION, *(const double *)code, &tmp_cnt);

@@ -5,7 +5,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef unsigned char opcode_t;
+const int OPCODE_BIT_SIZE = 5;
+
+struct opcode_t {
+    unsigned char m: 1;
+    unsigned char r: 1;
+    unsigned char i: 1;
+    unsigned char opcode: OPCODE_BIT_SIZE;
+};
 
 const uint64_t SIGNATURE = 0x1000DEAD7;
 const size_t MAX_OPCODE_LEN = 4;

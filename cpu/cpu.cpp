@@ -72,14 +72,18 @@ CPU_ERRORS execute (const void *code_v, size_t code_size)
     assert (code_v != nullptr && "pointer can't be null");
 
     const char *code     = (const char *) code_v;
-    opcode_t cmd         = 0;
+    int cmd              = 0;
+    bool m_flag = false, r_flag = false, i_flag = false;
     double op1 = 0, op2  = 0;
     stack_t stk          = {};
     stack_ctor (&stk, sizeof (double));
 
     while (code_size > 0)
     {
-        cmd = *(const opcode_t *) code;
+        cmd = ((const opcode_t *) code)->opcode;
+        m_flag   = ((const opcode_t *) code)->m;
+        r_flag   = ((const opcode_t *) code)->r;
+        i_flag   = ((const opcode_t *) code)->i;
         code      += sizeof (opcode_t);
         code_size -= sizeof (opcode_t);
 
