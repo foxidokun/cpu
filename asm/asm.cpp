@@ -12,12 +12,13 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
     assert (code   != nullptr && "pointer can't be null");
     assert (source != nullptr && "pointer can't be null");
 
-    code->pre_header.signature = SIGNATURE;
-    code->pre_header.version   = VERSION;
-    code->header.hash          = 0;
-    code->header.code_size     = 0;
-    code->mcode                = calloc (CODE_BUF_RESERVED, 1);
-    code->mcode_capacity       = CODE_BUF_RESERVED;
+    code->pre_header.signature        = SIGNATURE;
+    code->pre_header.header_version   = HEADER_VERSION;
+    code->pre_header.binary_version   = BINARY_VERSION;
+    code->header.hash                 = 0;
+    code->header.code_size            = 0;
+    code->mcode                       = calloc (CODE_BUF_RESERVED, 1);
+    code->mcode_capacity              = CODE_BUF_RESERVED;
 
     if (code->mcode == nullptr) { return ASM_ERRORS::NOMEM; }
 

@@ -5,7 +5,9 @@
 #include "../file/file.h"
 #include "../common/common.h"
 
-const char VERSION = 1;
+const char BINARY_VERSION = 2;
+const char HEADER_VERSION = 1;
+
 typedef header_v1_t header_t;
 const int CODE_BUF_RESERVED = 2 * (sizeof (opcode_t) + sizeof (double));
 

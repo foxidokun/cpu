@@ -17,7 +17,8 @@ struct opcode_t {
 struct pre_header_t
 {
     uint64_t signature;
-    unsigned char version;
+    unsigned char binary_version;
+    unsigned char header_version;
 };
 
 struct header_v1_t

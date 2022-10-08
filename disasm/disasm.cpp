@@ -9,7 +9,7 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
     assert ( dest  != nullptr && "Pointer can't be null");
     assert (source != nullptr && "Pointer can't be null");
 
-    BIN_ERROR err = verify_binary (source, binary_size, VERSION);
+    BIN_ERROR err = verify_binary (source, binary_size, BINARY_VERSION, HEADER_VERSION);
     if (err != BIN_ERROR::OK)
     {
         log (log::ERR, "Wrong binary, error: %s", bin_strerror (err));

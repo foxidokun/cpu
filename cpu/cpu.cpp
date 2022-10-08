@@ -9,7 +9,7 @@ CPU_ERRORS run_binary (const void *binary, size_t binary_size)
 {
     assert (binary != nullptr && "pointer can't be null");
 
-    BIN_ERROR res = verify_binary (binary, binary_size, VERSION);
+    BIN_ERROR res = verify_binary (binary, binary_size, BINARY_VERSION, HEADER_VERSION);
     if (res != BIN_ERROR::OK)
     {
         log (log::ERR, "Invalid binary, error: %s", bin_strerror (res));

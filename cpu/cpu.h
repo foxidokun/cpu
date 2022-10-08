@@ -5,7 +5,9 @@
 #include "../common/config.h"
 #include "../stack/stack.h"
 
-const int VERSION = 1;
+const int HEADER_VERSION = 1;
+const int BINARY_VERSION = 2;
+
 typedef header_v1_t header_t;
 
 enum class CPU_ERRORS
