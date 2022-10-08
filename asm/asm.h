@@ -6,7 +6,7 @@
 #include "../common/common.h"
 #include "../hashmap/hashmap.h"
 
-const char BINARY_VERSION = 2;
+const char BINARY_VERSION = 3;
 const char HEADER_VERSION = 1;
 
 typedef header_v1_t header_t;
