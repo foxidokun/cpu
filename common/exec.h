@@ -47,6 +47,7 @@ enum OPCODE
     JBE,  //15
     JE,   //16
     JNE,  //17
+    ZXC,  //18
     _OPCODE_CNT_
 };
 
@@ -68,7 +69,8 @@ const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "jb"  ,
     "jbe" ,
     "je"  ,
-    "jne"
+    "jne",
+    "zxc"
     };
 
 enum class BIN_ERROR

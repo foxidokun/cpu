@@ -94,7 +94,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
         instruct = (const opcode_t *) (cpu->code + cpu->in);
         cpu->in += sizeof (opcode_t);
 
-        log (log::DBG, "Decoding opcode %d (%s)", instruct->opcode, COMMAND_NAMES[instruct->opcode]);
+        log (log::DBG, "Decoding opcode %2d (%*s)", instruct->opcode, MAX_OPCODE_LEN, COMMAND_NAMES[instruct->opcode]);
 
         switch (instruct->opcode) {
             case HLT:
@@ -123,6 +123,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
 
             _ONE_EL_FUNC(INC, ++);
             _ONE_EL_FUNC(DEC, --);
+            _ONE_EL_FUNC(ZXC, -7 +);
             
             case JMP:
                 _JMP_CODE();

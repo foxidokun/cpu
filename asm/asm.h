@@ -6,7 +6,7 @@
 #include "../common/common.h"
 #include "../hashmap/hashmap.h"
 
-const char BINARY_VERSION = 3;
+const char BINARY_VERSION = 4;
 const char HEADER_VERSION = 1;
 const int NUM_OF_PASSES   = 2;
 

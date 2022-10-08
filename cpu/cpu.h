@@ -6,7 +6,7 @@
 #include "../stack/stack.h"
 
 const int HEADER_VERSION = 1;
-const int BINARY_VERSION = 3;
+const int BINARY_VERSION = 4;
 
 typedef header_v1_t header_t;
 
