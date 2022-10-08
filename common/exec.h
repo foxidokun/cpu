@@ -31,10 +31,11 @@ enum OPCODE
 {
     HLT  =   0,
     PUSH,  //1,
-    ADD,   //2,
-    SUB,   //3,
-    DIV,   //4,
-    MUL,   //5
+    POP,   //2
+    ADD,   //3,
+    SUB,   //4,
+    DIV,   //5,
+    MUL,   //6
     INC,   //7,
     DEC,   //8,
     OUT,   //9,
@@ -45,6 +46,7 @@ enum OPCODE
 const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
     "halt",
     "push",
+    "pop",
     "add",
     "sub",
     "div",
