@@ -30,9 +30,14 @@ int main (int argc, char *argv[])
     fclose (in_file);
 
     struct code_t code = {};
-    assert (compile (&code, source) == ASM_ERRORS::OK);
-    assert (write_binary (out_file, &code) == 0);
-    
+    if (compile (&code, source) != ASM_ERRORS::OK)
+    {
+        fprintf (stderr, "Failed to compile, see logs\n");
+    }
+    else {
+        assert (write_binary (out_file, &code) == 0);
+    }
+
     fclose (out_file);
     free_text (source);
 }

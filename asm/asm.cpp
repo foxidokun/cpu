@@ -1,6 +1,7 @@
 #include <assert.h>
 #include <string.h>
 #include <limits.h>
+#include <ctype.h>
 
 #include "asm.h"
 #include "../stack/log.h"
@@ -65,7 +66,7 @@ int translate_command (void *const buf, const char *line)
     char *buf_c                = (char *) buf;
     int cmd_len                = 0;
     int ret_code               = 0;
-    bool syntax_error          = true;
+    bool command_not_found     = true;
 
     ret_code = sscanf (line, "%s%n", cmd, &cmd_len);
     if (ret_code != 1) return ERROR;
@@ -85,26 +86,113 @@ int translate_command (void *const buf, const char *line)
 
             if (i == PUSH)
             {
-                ((opcode_t *) buf_c)->i = true;
-                int arg = 0.0;
-                
-                ret_code = sscanf (line, "%i", &arg);
-                if (ret_code != 1) return ERROR;
-
-                * ((int *) buf_c) = arg;
-                buf_c += sizeof (int);
+                ret_code = translate_arg (((opcode_t *) buf_c) - 1, line, buf_c);
+                if (ret_code == ERROR) return ERROR;
+                else buf_c += ret_code;
             }
 
-            syntax_error = false;
+            command_not_found = false;
             break;
         }
     }
 
     assert (buf_c - (char *) buf < INT_MAX && "Too long command => bad type casting");
 
-    if (syntax_error) return ERROR;
-    else              return (int)(buf_c - (char *) buf);
+    if (command_not_found) return ERROR;
+    else                   return (int)(buf_c - (char *) buf);
 }
+
+#define _SKIP_SPACE                                 \
+{                                                   \
+    while (isspace(arg_str[0]) && arg_len > 0)      \
+    {                                               \
+        arg_str++;                                  \
+        arg_len--;                                  \
+    }                                               \
+                                                    \
+}
+
+int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
+{
+    assert (opcode  != nullptr && "pointer can't be null");
+    assert (arg_str != nullptr && "pointer can't be null");
+    assert (buf     != nullptr && "pointer can't be null");
+
+    opcode->m       = false;
+    opcode->r       = false;
+    opcode->i       = false;
+    int arg         = 0;
+    int reg_num     = 0;
+    int arg_bin_len = 0;
+    size_t arg_len  = strlen (arg_str);
+
+    _SKIP_SPACE
+    if (arg_str[0] == '[')
+    {
+        if (arg_str[arg_len-1] != ']') return ERROR;
+        else 
+        {
+            opcode->m = true;
+            arg_str++;
+            arg_len -= 2;
+        }
+    }
+
+    for (int i = 0; i < 3; ++i)
+    {
+        _SKIP_SPACE
+        if (isdigit (arg_str[0]))
+        {
+            if (opcode->i) return ERROR;
+            opcode->i   = true;
+            int int_len = 0;
+
+            sscanf (arg_str, "%d%n", &arg, &int_len);
+            if (int_len == 0) return ERROR;        
+            arg_str += int_len;
+            arg_len -= int_len;
+        }
+        else if (arg_str[0] == 'r' && arg_str[2] == 'x')
+        {
+            if (opcode->r) return ERROR;
+            opcode->r = true;
+            reg_num   = arg_str[1] - 'a';
+            arg_str  += 3;
+            arg_len  -= 3;
+
+            if (reg_num < 0 || reg_num > REG_CNT) return ERROR;
+        }
+        else if (arg_str[0] == '+' && i == 1)
+        {
+            arg_str++;
+            arg_len--;
+        }
+        else if (arg_str[0] != '\0' && arg_len != 0)
+        {
+            log (log::DBG, "Failed with str '%s', char: %d", arg_str, arg_str[0]);
+            return ERROR;
+        }
+
+        _SKIP_SPACE
+    }
+
+    if (opcode->i)
+    {
+        *(int *) buf = arg;
+        buf = (char *) buf + sizeof (int);
+        arg_bin_len += sizeof (int);
+    }
+    if (opcode->r)
+    {
+        *(unsigned char *) buf = reg_num;
+        buf = (char *) buf + sizeof (unsigned char);
+        arg_bin_len += sizeof (unsigned char);
+    }
+
+    return arg_bin_len;
+}
+
+#undef _SKIP_SPACE
 
 int write_binary (FILE *stream, const struct code_t *code)
 {

@@ -28,6 +28,8 @@ ASM_ERRORS compile (struct code_t *code, const text *source);
 
 int translate_command (void *const buf, const char *line);
 
+int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf);
+
 int write_binary (FILE *stream, const struct code_t *code);
 
 
