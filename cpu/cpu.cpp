@@ -63,6 +63,24 @@ case opcode:                                     \
     _STK_UNWRAP (stack_push(&cpu->stk, &op1));   \
     break; 
 
+#define _JMP_CODE()                                       \
+cpu->in = (unsigned int) extract_arg_push (cpu, instruct);
+
+
+#define _JMP_IF(opcode, oper)                    \
+case opcode:                                     \
+    _STK_UNWRAP (stack_pop (&cpu->stk, &op2));   \
+    _STK_UNWRAP (stack_pop (&cpu->stk, &op1));   \
+    if (op1 oper op2)                            \
+    {                                            \
+        _JMP_CODE()                              \
+    }                                            \
+    else                                         \
+    {                                            \
+        cpu->in += sizeof (int);                 \
+    }                                            \
+    break;
+
 CPU_ERRORS execute (cpu_t *const cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
@@ -71,11 +89,10 @@ CPU_ERRORS execute (cpu_t *const cpu)
     int op1 = 0, op2 = 0;
     int *op_ptr;
 
-    while (cpu->code_size > 0)
+    for (cpu->in = 0; cpu->in < cpu->code_size;)
     {
-        instruct = ((const opcode_t *) cpu->code);
-        cpu->code      += sizeof (opcode_t);
-        cpu->code_size -= sizeof (opcode_t);
+        instruct = (const opcode_t *) (cpu->code + cpu->in);
+        cpu->in += sizeof (opcode_t);
 
         log (log::DBG, "Decoding opcode %d (%s)", instruct->opcode, COMMAND_NAMES[instruct->opcode]);
 
@@ -107,6 +124,17 @@ CPU_ERRORS execute (cpu_t *const cpu)
             _ONE_EL_FUNC(INC, ++);
             _ONE_EL_FUNC(DEC, --);
             
+            case JMP:
+                _JMP_CODE();
+                break;
+
+            _JMP_IF (JA,  > );
+            _JMP_IF (JAE, >=);
+            _JMP_IF (JB,  < );
+            _JMP_IF (JBE, <=);
+            _JMP_IF (JE,  ==);
+            _JMP_IF (JNE, !=);
+
             case OUT:
                 _STK_UNWRAP (stack_pop (&cpu->stk, &op1));
                 printf ("you really can't calculate %i without calc?\n", op1);
@@ -136,15 +164,13 @@ int extract_arg_push (cpu_t *cpu, const opcode_t *const instruct)
 
     if (instruct->i)
     {
-        arg += *(const int *) cpu->code;
-        cpu->code      += sizeof (int);
-        cpu->code_size -= sizeof (int);
+        arg += *(const int *) (cpu->code + cpu->in);
+        cpu->in += sizeof (int);
     }
     if (instruct->r)
     {
-        arg += cpu->regs[*(const unsigned char *) cpu->code];
-        cpu->code      += sizeof (unsigned char);
-        cpu->code_size -= sizeof (unsigned char);
+        arg += cpu->regs[((const unsigned char *) cpu->code)[cpu->in]];
+        cpu->in += sizeof (unsigned char);
     }
     if (instruct->m)
     {
@@ -172,9 +198,8 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
     {
         if (instruct->i) return nullptr;
         
-        arg_ptr = &cpu->regs[*(const unsigned char *) cpu->code];
-        cpu->code      += sizeof (unsigned char);
-        cpu->code_size -= sizeof (unsigned char);
+        arg_ptr = &cpu->regs[((const unsigned char *) cpu->code)[cpu->in]];
+        cpu->in += sizeof (unsigned char);
     }
 
     return arg_ptr;
@@ -187,6 +212,7 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
 
     cpu->code      = (const char *) code;
     cpu->code_size = code_size;
+    cpu->in        = 0;
     stack_ctor (&cpu->stk, sizeof (int));
 
     return CPU_ERRORS::OK;

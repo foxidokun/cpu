@@ -6,7 +6,7 @@
 #include "../stack/stack.h"
 
 const int HEADER_VERSION = 1;
-const int BINARY_VERSION = 2;
+const int BINARY_VERSION = 3;
 
 typedef header_v1_t header_t;
 
@@ -25,6 +25,7 @@ struct cpu_t
     int regs[REG_CNT];
     int ram[TOTAL_RAM_SIZE];
     size_t code_size;
+    size_t in;
 };
 
 CPU_ERRORS run_binary (const void *binary, size_t binary_size);
