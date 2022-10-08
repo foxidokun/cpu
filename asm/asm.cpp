@@ -69,6 +69,8 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
 
 ASM_ERRORS init_code (code_t *code)
 {
+    assert (code != nullptr && "pointer can't be null");
+
     code->pre_header.signature        = SIGNATURE;
     code->pre_header.header_version   = HEADER_VERSION;
     code->pre_header.binary_version   = BINARY_VERSION;
@@ -97,6 +99,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
 {
     assert (buf  != nullptr && "pointer can't be null");
     assert (line != nullptr && "pointer can't be null");
+    assert (code != nullptr && "pointer can't be null");
     
     char cmd[MAX_ASM_LINE_LEN+1] = "";
     char *buf_c                  = (char *) buf;
@@ -308,6 +311,9 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
 
 static int _strcmp_on_void (const void *a, const void *b)
 {
+    assert (a != nullptr && "pointer can't be null");
+    assert (b != nullptr && "pointer can't be null");
+
     return strcmp ((const char *)a, (const char *)b);
 }
 
