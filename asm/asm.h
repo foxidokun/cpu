@@ -29,7 +29,13 @@ struct code_t
     hashmap *name_table;
 };
 
+ASM_ERRORS init_code (code_t *code);
+
+void free_code (code_t *code);
+
 ASM_ERRORS compile (struct code_t *code, const text *source);
+
+ASM_ERRORS one_pass_compile (struct code_t *code, const text *source);
 
 int translate_command (void *const buf, const char *line, code_t *code);
 

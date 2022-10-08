@@ -15,10 +15,65 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
     assert (code   != nullptr && "pointer can't be null");
     assert (source != nullptr && "pointer can't be null");
 
+    for (int n_pass = 0; n_pass < NUM_OF_PASSES; ++n_pass)
+    {
+        code->header.code_size = 0;
+        one_pass_compile (code, source);
+    }
+
+    code->header.hash = djb2 (code->mcode, code->header.code_size);
+
+    return ASM_ERRORS::OK;
+}
+
+ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
+{
+    assert (code   != nullptr && "pointer can't be null");
+    assert (source != nullptr && "pointer can't be null");
+
+    code->header.code_size            = 0;
+
+    char *mcode_ptr = (char *) code->mcode;
+    ssize_t write_len = 0;
+
+    for (unsigned int i = 0; i < source->n_lines; ++i)
+    {
+        if (source->lines[i].len <= 1 || source->lines[i].content[0] == ';')
+        {
+            continue;
+        }
+
+        write_len = translate_command (mcode_ptr, source->lines[i].content, code);
+        if (write_len == -1)
+        {
+            log (log::ERR, "Failed to parse command on line %d", i+1);
+            return ASM_ERRORS::SYNTAX;
+        }
+
+        mcode_ptr              += (size_t) write_len;
+        code->header.code_size += (size_t) write_len;
+
+        if (code->header.code_size > code->mcode_capacity - CODE_BUF_RESERVED)
+        {
+            void *tmp_ptr = realloc (code->mcode, 2 * code->mcode_capacity);
+            if (tmp_ptr == nullptr) { return ASM_ERRORS::NOMEM; }
+
+            mcode_ptr = (mcode_ptr - (char *)code->mcode) + (char *)tmp_ptr;
+            code->mcode = tmp_ptr;
+            code->mcode_capacity *= 2;
+        }
+    }
+
+    return ASM_ERRORS::OK;
+}
+
+ASM_ERRORS init_code (code_t *code)
+{
     code->pre_header.signature        = SIGNATURE;
     code->pre_header.header_version   = HEADER_VERSION;
     code->pre_header.binary_version   = BINARY_VERSION;
     code->header.hash                 = 0;
+    code->header.code_size            = 0;
     code->mcode                       = calloc (CODE_BUF_RESERVED, 1);
     code->mcode_capacity              = CODE_BUF_RESERVED;
     if (code->mcode == nullptr) { return ASM_ERRORS::NOMEM; }
@@ -27,45 +82,15 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
                                                 sizeof (unsigned int), djb2, _strcmp_on_void);
     if (code->name_table == nullptr) { return ASM_ERRORS::NOMEM; }
 
-    for (int n_pass = 0; n_pass < NUM_OF_PASSES; ++n_pass)
-    {
-        code->header.code_size            = 0;
-
-        char *mcode_ptr = (char *) code->mcode;
-        ssize_t write_len = 0;
-
-        for (unsigned int i = 0; i < source->n_lines; ++i)
-        {
-            if (source->lines[i].len <= 1 || source->lines[i].content[0] == ';')
-            {
-                continue;
-            }
-
-            write_len = translate_command (mcode_ptr, source->lines[i].content, code);
-            if (write_len == -1)
-            {
-                log (log::ERR, "Failed to parse command on line %d", i+1);
-                return ASM_ERRORS::SYNTAX;
-            }
-
-            mcode_ptr              += (size_t) write_len;
-            code->header.code_size += (size_t) write_len;
-
-            if (code->header.code_size > code->mcode_capacity - CODE_BUF_RESERVED)
-            {
-                void *tmp_ptr = realloc (code->mcode, 2 * code->mcode_capacity);
-                if (tmp_ptr == nullptr) { return ASM_ERRORS::NOMEM; }
-
-                mcode_ptr = (mcode_ptr - (char *)code->mcode) + (char *)tmp_ptr;
-                code->mcode = tmp_ptr;
-                code->mcode_capacity *= 2;
-            }
-        }
-    }
-
-    code->header.hash = djb2 (code->mcode, code->header.code_size);
-
     return ASM_ERRORS::OK;
+}
+
+void free_code (code_t *code)
+{
+    if (code == nullptr) return;
+
+    free (code->mcode);
+    hashmap_free (code->name_table);
 }
 
 int translate_command (void *const buf, const char *line, code_t *code)

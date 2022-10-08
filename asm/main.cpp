@@ -30,7 +30,12 @@ int main (int argc, char *argv[])
     fclose (in_file);
 
     struct code_t code = {};
-    if (compile (&code, source) != ASM_ERRORS::OK)
+    
+    if ( init_code (&code) != ASM_ERRORS::OK )
+    {
+        fprintf (stderr, "Failed to init code struct, OOM probably\n");
+    }
+    else if ( compile (&code, source) != ASM_ERRORS::OK )
     {
         fprintf (stderr, "Failed to compile, see logs\n");
     }
@@ -40,5 +45,5 @@ int main (int argc, char *argv[])
 
     fclose (out_file);
     free_text (source);
-    free (code.mcode);
+    free_code (&code);
 }
