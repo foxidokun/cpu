@@ -151,7 +151,7 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
             sscanf (arg_str, "%d%n", &arg, &int_len);
             if (int_len == 0) return ERROR;        
             arg_str += int_len;
-            arg_len -= int_len;
+            arg_len -= (size_t) int_len;
         }
         else if (arg_str[0] == 'r' && arg_str[2] == 'x')
         {
@@ -181,13 +181,14 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
     {
         *(int *) buf = arg;
         buf = (char *) buf + sizeof (int);
-        arg_bin_len += sizeof (int);
+        arg_bin_len += (int) sizeof (int);
     }
     if (opcode->r)
     {
-        *(unsigned char *) buf = reg_num;
+        assert (reg_num <= CHAR_MAX && reg_num > 0 && "Invalid type casting");
+        *(unsigned char *) buf = (unsigned char) reg_num;
         buf = (char *) buf + sizeof (unsigned char);
-        arg_bin_len += sizeof (unsigned char);
+        arg_bin_len += (int) sizeof (unsigned char);
     }
 
     return arg_bin_len;
