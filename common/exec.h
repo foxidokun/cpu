@@ -66,7 +66,7 @@ enum class BIN_ERROR
     BAD_VERSION,
 };
 
-BIN_ERROR verify_binary (const void *bin, size_t bin_size, unsigned char version);
+BIN_ERROR verify_binary (const void *bin, size_t bin_size, unsigned char bin_version, unsigned char head_version);
 
 const char *bin_strerror (BIN_ERROR err);
 
