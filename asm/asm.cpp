@@ -7,8 +7,7 @@
 #include "../stack/log.h"
 #include "../stack/hash.h"
 
-static int _strcmp_on_void (const void *a, const void *b);
-
+static int _strcmp_void (const void *a, const void *b);
 
 ASM_ERRORS compile (struct code_t *code, const text *source)
 {
@@ -44,7 +43,7 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
         }
 
         write_len = translate_command (mcode_ptr, source->lines[i].content, code);
-        if (write_len == -1)
+        if (write_len == ERROR)
         {
             log (log::ERR, "Failed to parse command on line %d", i+1);
             return ASM_ERRORS::SYNTAX;
@@ -81,7 +80,7 @@ ASM_ERRORS init_code (code_t *code)
     if (code->mcode == nullptr) { return ASM_ERRORS::NOMEM; }
 
     code->name_table                  = hashmap_create (LABEL_START_CAPACITY, MAX_LABEL_LEN+1,
-                                                sizeof (unsigned int), djb2, _strcmp_on_void);
+                                                sizeof (unsigned int), strhash, _strcmp_void);
     if (code->name_table == nullptr) { return ASM_ERRORS::NOMEM; }
 
     return ASM_ERRORS::OK;
@@ -130,15 +129,25 @@ int translate_command (void *const buf, const char *line, code_t *code)
             {
                 case PUSH:
                     ret_code = translate_arg (instr_ptr, line, buf_c);
-                    if (ret_code == ERROR) return ERROR;
-                    else buf_c += ret_code;
+                    if (ret_code == ERROR)
+                    {
+                        ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
+                        if (ret_code == ERROR) return ERROR;
+                    }
+                    
+                    buf_c += ret_code;
                     break;
 
                 case POP:
                     ret_code = translate_arg (instr_ptr, line, buf_c);
-                    if (ret_code == ERROR) return ERROR;
+                    if (ret_code == ERROR)
+                    {
+                        ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
+                        if (ret_code == ERROR) return ERROR;
+                    }
                     else if (instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) return ERROR;
-                    else buf_c += ret_code;
+                    
+                    buf_c += ret_code;
                     break;
 
                 case JMP:
@@ -170,7 +179,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
 
     if (command_not_found)
     {
-        if (try_to_parse_label (code, cmd, (int) (buf_c - (char *) code->mcode)))
+        if (try_to_parse_label (code, line - cmd_len, (int) (buf_c - (char *) code->mcode)))
             command_not_found = false;
     }
 
@@ -221,7 +230,6 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
         _SKIP_SPACE
         if (isdigit (arg_str[0]) || arg_str[0] == '-')
         {
-            if (opcode->i) return ERROR;
             opcode->i   = true;
             int int_len = 0;
 
@@ -232,7 +240,6 @@ int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
         }
         else if (arg_str[0] == 'r' && arg_str[2] == 'x')
         {
-            if (opcode->r) return ERROR;
             opcode->r = true;
             reg_num   = arg_str[1] - 'a';
             arg_str  += 3;
@@ -283,13 +290,13 @@ int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap
     instr->r = false;
     instr->i = true;
 
-    unsigned int *buf_ui  = (unsigned int *) buf;
-    unsigned int *jmp_pos = (unsigned int *) hashmap_get(name_table, line);
+    while (isspace(line[0])) line++;
 
-    if (jmp_pos == nullptr) *buf_ui = BAD_JMP_ADDR;
-    else                    *buf_ui = *jmp_pos;
-    
-    return sizeof (unsigned int);
+    unsigned int *buf_ui  = (unsigned int *) buf;
+    unsigned int *lbl_val = (unsigned int *) hashmap_get (name_table, line);
+
+    if (lbl_val == nullptr) { *buf_ui = BAD_JMP_ADDR; return ERROR;                 }
+    else                    { *buf_ui = *lbl_val;     return sizeof (unsigned int); }
 }
 
 bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
@@ -297,7 +304,6 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     assert (code != nullptr && "pointer can't be null");
     assert (line != nullptr && "pointer can't be null");
 
-    bool is_success = false;
     char label[MAX_LABEL_LEN+1];
     strncpy (label, line, MAX_LABEL_LEN);
 
@@ -306,26 +312,32 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
         if (label[i] == ':')
         {
             label[i] = '\0';
-            is_success  = true;
-            break;
+            hashmap_insert (code->name_table, label, i+1,
+                        &bin_pos, sizeof (int));
+            return true;
         }
     }
 
-    if (is_success)
+    if (strstr (line, "equ") != nullptr)
     {
+        int arg = 0;
+        sscanf (line, "%s", label);
+        sscanf (strstr (line, "equ") + 3, "%d", &arg);
+        
         hashmap_insert (code->name_table, label, MAX_LABEL_LEN+1,
-                        &bin_pos, sizeof (int));
+                        &arg, sizeof (int));
+        return true;
     }
 
-    return is_success;
+    return false;
 }
 
-static int _strcmp_on_void (const void *a, const void *b)
+static int _strcmp_void(const void *a, const void *b)
 {
     assert (a != nullptr && "pointer can't be null");
     assert (b != nullptr && "pointer can't be null");
 
-    return strcmp ((const char *)a, (const char *)b);
+    return strcmp ((const char *) a, (const char *) b);
 }
 
 int write_binary (FILE *stream, const struct code_t *code)

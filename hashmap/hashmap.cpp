@@ -84,7 +84,7 @@ int hashmap_insert (hashmap *map, const void *key, size_t key_size, const void *
 
     if (map->allocated == map->used) return ERROR; // OOM
 
-    size_t id = map->hash (key, map->max_key_size) % map->allocated;
+    size_t id = map->hash (key, key_size) % map->allocated;
 
     // ID already in use with different key
     if (check_bit (map->flags, id) && map->comp (key, (char *) map->keys + id*map->max_key_size))
