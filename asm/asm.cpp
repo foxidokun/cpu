@@ -18,6 +18,7 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
     {
         code->header.code_size = 0;
         one_pass_compile (code, source);
+        code->n_pass++;
     }
 
     code->header.hash = djb2 (code->mcode, code->header.code_size);
@@ -77,6 +78,7 @@ ASM_ERRORS init_code (code_t *code)
     code->header.code_size            = 0;
     code->mcode                       = calloc (CODE_BUF_RESERVED, 1);
     code->mcode_capacity              = CODE_BUF_RESERVED;
+    code->n_pass                      = 0;
     if (code->mcode == nullptr) { return ASM_ERRORS::NOMEM; }
 
     code->name_table                  = hashmap_create (LABEL_START_CAPACITY, MAX_LABEL_LEN+1,
@@ -121,6 +123,9 @@ int translate_command (void *const buf, const char *line, code_t *code)
             #pragma GCC diagnostic ignored "-Wconversion"
             assert (i < 1<<OPCODE_BIT_SIZE && "Invalid instruction => overflow");
             instr_ptr->opcode = i;
+            instr_ptr->m      = false;
+            instr_ptr->r      = false;
+            instr_ptr->i      = false;
             #pragma GCC diagnostic pop
 
             buf_c += sizeof (opcode_t);
@@ -132,10 +137,15 @@ int translate_command (void *const buf, const char *line, code_t *code)
                     if (ret_code == ERROR)
                     {
                         ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
-                        if (ret_code == ERROR) return ERROR;
+                        if (ret_code == ERROR && code->n_pass != 0) return ERROR;
+                        
+                        buf_c += sizeof (int);
+                    }
+                    else
+                    {
+                        buf_c += ret_code;
                     }
                     
-                    buf_c += ret_code;
                     break;
 
                 case POP:
@@ -143,7 +153,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
                     if (ret_code == ERROR)
                     {
                         ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
-                        if (ret_code == ERROR) return ERROR;
+                        if (ret_code == ERROR && code->n_pass != 0) return ERROR;
                     }
                     else if (instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) return ERROR;
                     
@@ -161,7 +171,10 @@ int translate_command (void *const buf, const char *line, code_t *code)
                     if (ret_code == ERROR)
                     {
                         if (sscanf (line, "%s", cmd) != 1) { return ERROR; }
-                        buf_c += translate_label (instr_ptr, cmd, buf_c, code->name_table);
+                        ret_code = translate_label (instr_ptr, cmd, buf_c, code->name_table);
+                        if (ret_code == ERROR && code->n_pass != 0) { return ERROR; }
+
+                        buf_c += sizeof (unsigned int);
                     }
                     else
                     {

@@ -5,7 +5,7 @@
 #include "../file/file.h"
 #include "../common/common.h"
 
-const char BINARY_VERSION = 2;
+const char BINARY_VERSION = 4;
 const char HEADER_VERSION = 1;
 typedef header_v1_t header_t;
 
@@ -21,5 +21,7 @@ enum class DISASM_ERRORS
 DISASM_ERRORS disassembly (char **out, size_t *buf_size, const void *source, size_t code_size);
 
 int translate_command (char *buf, const void *code, size_t *code_shift);
+
+unsigned int write_arg (const opcode_t *instr, char *buf, const void *code, size_t *code_shift);
 
 #endif

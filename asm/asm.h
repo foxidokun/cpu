@@ -27,6 +27,7 @@ struct code_t
     void *mcode;
     size_t mcode_capacity;
     hashmap *name_table;
+    unsigned int n_pass;
 };
 
 ASM_ERRORS init_code (code_t *code);

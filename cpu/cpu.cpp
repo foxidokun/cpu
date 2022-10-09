@@ -64,7 +64,8 @@ case opcode:                                     \
     break; 
 
 #define _JMP_CODE()                                       \
-cpu->in = (unsigned int) extract_arg_push (cpu, instruct);
+cpu->in = (unsigned int) extract_arg_push (cpu, instruct);\
+log (log::DBG, "Jumping to %d", cpu->in);
 
 
 #define _JMP_IF(opcode, oper)                    \
