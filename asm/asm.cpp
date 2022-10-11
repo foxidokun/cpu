@@ -31,7 +31,7 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
     assert (code   != nullptr && "pointer can't be null");
     assert (source != nullptr && "pointer can't be null");
 
-    code->header.code_size            = 0;
+    code->header.code_size = 0;
 
     char *mcode_ptr = (char *) code->mcode;
     ssize_t write_len = 0;
