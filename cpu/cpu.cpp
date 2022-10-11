@@ -64,7 +64,7 @@ case opcode:                                     \
     break; 
 
 #define _JMP_CODE()                                       \
-cpu->in = (unsigned int) extract_arg_push (cpu, instruct);\
+cpu->in = (unsigned int) extract_arg (cpu, instruct);\
 log (log::DBG, "Jumping to %d", cpu->in);
 
 
@@ -103,7 +103,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
                 break;
 
             case PUSH:
-                op1 = extract_arg_push (cpu, instruct);
+                op1 = extract_arg (cpu, instruct);
                 _STK_UNWRAP (stack_push (&cpu->stk, &op1));
                 break;
 
@@ -157,7 +157,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
     return CPU_ERRORS::OK;
 }
 
-int extract_arg_push (cpu_t *cpu, const opcode_t *const instruct)
+int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
 {
     assert (cpu      != nullptr && "pointer can't be null");
     assert (instruct != nullptr && "pointer can't be null");
@@ -193,7 +193,7 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
     if (instruct -> m)
     {
         instruct_copy.m = false;
-        arg_ptr = &cpu->ram[extract_arg_push (cpu, &instruct_copy)];
+        arg_ptr = &cpu->ram[extract_arg (cpu, &instruct_copy)];
         instruct_copy.m = true;
     }
     else
