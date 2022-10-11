@@ -27,30 +27,6 @@ struct header_v1_t
     size_t code_size;
 };
 
-enum OPCODE
-{
-    HLT  =   0,
-    PUSH,  //1,
-    POP,   //2
-    ADD,   //3,
-    SUB,   //4,
-    DIV,   //5,
-    MUL,   //6
-    INC,   //7,
-    DEC,   //8,
-    OUT,   //9,
-    INP,  //10,
-    JMP,  //11
-    JA,   //12
-    JAE,  //13
-    JB,   //14
-    JBE,  //15
-    JE,   //16
-    JNE,  //17
-    ZXC,  //18
-    _OPCODE_CNT_
-};
-
 enum class BIN_ERROR
 {
     OK = 0,

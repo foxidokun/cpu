@@ -19,7 +19,7 @@
     }                                                                                   \
 }
 
-#define CMD_DEF(name, number, code)             \
+#define CMD_DEF(name, number, code, ...)        \
 case number:                                    \
     log (log::DBG, "Decoding opcode %2d (%*s)", \
         number, MAX_OPCODE_LEN, #name);         \

@@ -52,12 +52,22 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
     return DISASM_ERRORS::OK;
 }
 
-#define CMD_DEF(name, number, ...)                                      \
+#define CMD_DEF(name, number, unused, req_arg)                          \
 if (cmd.opcode == number)                                               \
 {                                                                       \
     strcpy (buf, #name);                                                \
     command_len = (unsigned int) strlen (#name);                        \
-} else 
+                                                                        \
+    if (req_arg)                                                        \
+    {                                                                   \
+        buf[0] = ' ';                                                   \
+        buf ++;                                                         \
+        cnt ++;                                                         \
+        tmp_cnt = write_arg (&cmd, buf, code, code_shift);              \
+        cnt +=  tmp_cnt;                                                \
+        buf +=  tmp_cnt;                                                \
+    }                                                                   \
+} else
 
 int translate_command (char *buf, const void *code, size_t *code_shift)
 {
@@ -65,8 +75,8 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     assert (code != nullptr && "pointer can't be null");
 
     unsigned int command_len = 0;
-    unsigned int cnt = 0;
-    int tmp_cnt      = 0;
+    unsigned int cnt         = 0;
+    unsigned int tmp_cnt     = 0;
     opcode_t cmd     = *(const opcode_t *) code;
 
     //**************************************//
@@ -84,21 +94,7 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     buf += command_len;
     cnt += command_len;
     code = (const char *) code + sizeof (opcode_t);
-    *code_shift = sizeof (opcode_t); 
-
-    // Commands that require args
-
-    if (cmd.opcode == PUSH || cmd.opcode == POP || cmd.opcode == JMP ||
-        cmd.opcode == JA   || cmd.opcode == JAE || cmd.opcode == JB ||
-        cmd.opcode == JBE  || cmd.opcode == JE  || cmd.opcode == JNE)
-    {
-        buf[0] = ' ';
-        buf ++;
-        cnt ++;
-        tmp_cnt = write_arg (&cmd, buf, code, code_shift);
-        cnt += (unsigned) tmp_cnt;
-        buf += (unsigned) tmp_cnt;
-    }
+    *code_shift = sizeof (opcode_t);
 
     buf[0] = '\n';
     cnt++;

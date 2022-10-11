@@ -96,13 +96,28 @@ void free_code (code_t *code)
     hashmap_free (code->name_table);
 }
 
-#define CMD_DEF(name, number, ...)                      \
-    if (strcasecmp (#name, cmd) == 0)                   \
-    {                                                   \
-        instr_ptr->opcode = number;                     \
-                                                        \
-        buf_c += sizeof (opcode_t);                     \
-        command_not_found = false;                      \
+#define CMD_DEF(name, number, unused, req_arg)                                          \
+    if (strcasecmp (#name, cmd) == 0)                                                    \
+    {                                                                                     \
+        instr_ptr->opcode = number;                                                        \
+                                                                                            \
+        buf_c += sizeof (opcode_t);                                                          \
+        command_not_found = false;                                                            \
+                                                                                               \
+        if (req_arg)                                                                            \
+        {                                                                                        \
+            ret_code = translate_arg(instr_ptr, line, buf_c);                                     \
+            if (ret_code == ERROR) {                                                               \
+                ret_code = translate_label(instr_ptr, line, buf_c, code->name_table);               \
+                if (ret_code == ERROR && code->n_pass != 0) return ERROR;                            \
+                                                                                                      \
+                buf_c += sizeof(int);                                                                  \
+            } else if (strcmp (#name, "pop") == 0 && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) { \
+                return ERROR;                                                                          \
+            } else {                                                                                  \
+                buf_c += ret_code;                                                                   \
+            }                                                                                      \
+        }                                                                                         \
     } else
 
 #define _IS_OPCODE(name) instr_ptr->opcode == name
@@ -142,26 +157,6 @@ int translate_command (void *const buf, const char *line, code_t *code)
                                                                              //
     // End of magic section                                                  //
     //***********************************************************************//
-
-    // Parsing argument if needed
-
-    if (!command_not_found &&
-            (_IS_OPCODE (PUSH) || _IS_OPCODE (POP) || _IS_OPCODE (JMP) || _IS_OPCODE (JA) ||
-             _IS_OPCODE (JAE)  || _IS_OPCODE (JB)  || _IS_OPCODE (JBE) || _IS_OPCODE (JE) ||
-             _IS_OPCODE (JNE)))
-    {
-        ret_code = translate_arg(instr_ptr, line, buf_c);
-        if (ret_code == ERROR) {
-            ret_code = translate_label(instr_ptr, line, buf_c, code->name_table);
-            if (ret_code == ERROR && code->n_pass != 0) return ERROR;
-
-            buf_c += sizeof(int);
-        } else if (instr_ptr->opcode == POP && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
-            return ERROR;
-        } else {
-            buf_c += ret_code;
-        }
-    }
 
     // Not command => label
 

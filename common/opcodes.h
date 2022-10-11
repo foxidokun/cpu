@@ -7,7 +7,7 @@
         POP (&OP1);                             \
         OP1 = func (OP1);                       \
         PUSH (&OP1);                            \
-    })                                          \
+    }, 0)                                       \
 
 #define _CMD_DEF_ARTHM(name, number, oper, check)   \
     CMD_DEF (name, number, {                        \
@@ -16,7 +16,7 @@
         {check};                                    \
         OP1 = OP1 oper OP2;                         \
         PUSH (&OP1);                                \
-    })                                              \
+    }, 0)                                           \
 
 #define _CMD_DEF_JMP_IF(name, number, cond)         \
     CMD_DEF (name, number, {                        \
@@ -26,10 +26,10 @@
         {                                           \
             JMP(GET_ARG ());                        \
         }                                           \
-    })                                              \
+    }, 1)                                           \
 
-CMD_DEF (halt, 0, { HLT (); })
-CMD_DEF (push, 1, { OP1 = GET_ARG ();    PUSH (&OP1);  })
+CMD_DEF (halt, 0, { HLT (); }, 0)
+CMD_DEF (push, 1, { OP1 = GET_ARG ();    PUSH (&OP1);  }, 1)
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();
     if (OPPTR == nullptr)
@@ -41,7 +41,7 @@ CMD_DEF (pop,  2, {
     {
         POP  (OPPTR);
     }
-})
+}, 1)
 
 _CMD_DEF_ARTHM (add, 3, +, ;)
 _CMD_DEF_ARTHM (sub, 4, -, ;)
@@ -59,16 +59,16 @@ _CMD_DEF_ONE_OP (dec, 8,  ++)
 CMD_DEF (out, 9, {
     POP (&OP1);
     OUT (OP1);
-})
+}, 0)
 
 CMD_DEF (inp, 10, {
     INP  (OP1);
     PUSH (&OP1);
-})
+}, 0)
 
 CMD_DEF (jmp, 11, {
     JMP (GET_ARG ());
-})
+}, 1)
 
 _CMD_DEF_JMP_IF (ja,  12, > )
 _CMD_DEF_JMP_IF (jae, 13, >=)
