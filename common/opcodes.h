@@ -24,9 +24,11 @@
     CMD_DEF (name, number, {                \
         POP_DATA (&OP2);                    \
         POP_DATA (&OP1);                    \
-        if (OP1 cond OP2)                   \
+        OP1 = (OP1 cond OP2);               \
+        OP2 = GET_ARG ();                   \
+        if (OP1)                            \
         {                                   \
-            JMP(GET_ARG ());                \
+            JMP (OP2);                      \
         }                                   \
     }, 1)                                   \
 
