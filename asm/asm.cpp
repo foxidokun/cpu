@@ -96,6 +96,17 @@ void free_code (code_t *code)
     hashmap_free (code->name_table);
 }
 
+#define CMD_DEF(name, number, ...)                      \
+    if (strcasecmp (#name, cmd) == 0)                   \
+    {                                                   \
+        instr_ptr->opcode = number;                     \
+                                                        \
+        buf_c += sizeof (opcode_t);                     \
+        command_not_found = false;                      \
+    } else
+
+#define _IS_OPCODE (name) instr_ptr.opcode == name
+
 int translate_command (void *const buf, const char *line, code_t *code)
 {
     assert (buf  != nullptr && "pointer can't be null");
@@ -113,82 +124,42 @@ int translate_command (void *const buf, const char *line, code_t *code)
     if (ret_code != 1) return ERROR;
     line += cmd_len;
 
-    for (unsigned int i = 0; i < _OPCODE_CNT_; ++i)
+    instr_ptr = (opcode_t *) buf_c;
+    instr_ptr->m = false;
+    instr_ptr->r = false;
+    instr_ptr->i = false;
+
+    // IF - ELSE section
+
+    #include "../common/opcodes.h"
+
+    /*else*/ if (try_to_parse_label (code, line - cmd_len,
+                                    (int) (buf_c - (char *) code->mcode)))
     {
-        if (strcasecmp (cmd, COMMAND_NAMES[i]) == 0)
-        {
-            instr_ptr = (opcode_t *) buf_c;
-
-            #pragma GCC diagnostic push
-            #pragma GCC diagnostic ignored "-Wconversion"
-            assert (i < 1<<OPCODE_BIT_SIZE && "Invalid instruction => overflow");
-            instr_ptr->opcode = i;
-            instr_ptr->m      = false;
-            instr_ptr->r      = false;
-            instr_ptr->i      = false;
-            #pragma GCC diagnostic pop
-
-            buf_c += sizeof (opcode_t);
-
-            switch (i)
-            {
-                case PUSH:
-                    ret_code = translate_arg (instr_ptr, line, buf_c);
-                    if (ret_code == ERROR)
-                    {
-                        ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
-                        if (ret_code == ERROR && code->n_pass != 0) return ERROR;
-                        
-                        buf_c += sizeof (int);
-                    }
-                    else
-                    {
-                        buf_c += ret_code;
-                    }
-                    
-                    break;
-
-                case POP:
-                    ret_code = translate_arg (instr_ptr, line, buf_c);
-                    if (ret_code == ERROR)
-                    {
-                        ret_code = translate_label (instr_ptr, line, buf_c, code->name_table);
-                        if (ret_code == ERROR && code->n_pass != 0) return ERROR;
-                    }
-                    else if (instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) return ERROR;
-                    
-                    buf_c += ret_code;
-                    break;
-
-                case JMP:
-                case JA:
-                case JAE:
-                case JB:
-                case JBE:
-                case JE:
-                case JNE:
-                    ret_code = translate_arg (instr_ptr, line, buf_c);
-                    if (ret_code == ERROR)
-                    {
-                        if (sscanf (line, "%s", cmd) != 1) { return ERROR; }
-                        ret_code = translate_label (instr_ptr, cmd, buf_c, code->name_table);
-                        if (ret_code == ERROR && code->n_pass != 0) { return ERROR; }
-
-                        buf_c += sizeof (unsigned int);
-                    }
-                    else
-                    {
-                        buf_c += ret_code;
-                    }
-                    break;
-
-                default: break;
-            }
-
             command_not_found = false;
-            break;
+    }
+
+    // Parsing argument if needed
+
+    if (!command_not_found &&
+            (_IS_OPCODE (PUSH) || _IS_OPCODE (POP) || _IS_OPCODE (JMP) || _IS_OPCODE (JA) ||
+             _IS_OPCODE (JAE)  || _IS_OPCODE (JB)  || _IS_OPCODE (JBE) || _IS_OPCODE (JE) ||
+             _IS_OPCODE (JNE)))
+    {
+        ret_code = translate_arg(instr_ptr, line, buf_c);
+        if (ret_code == ERROR) {
+            ret_code = translate_label(instr_ptr, line, buf_c, code->name_table);
+            if (ret_code == ERROR && code->n_pass != 0) return ERROR;
+
+            buf_c += sizeof(int);
+        } else if (instr_ptr == POP && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
+            return ERROR;
+        } else {
+            buf_c += ret_code;
         }
     }
+
+    // Not command => label
 
     if (command_not_found)
     {
@@ -201,6 +172,9 @@ int translate_command (void *const buf, const char *line, code_t *code)
     if (command_not_found) return ERROR;
     else                   return (int)(buf_c - (char *) buf);
 }
+
+#undef _IS_OPCODE
+#undef CMD_DEF
 
 #define _SKIP_SPACE                                 \
 {                                                   \
