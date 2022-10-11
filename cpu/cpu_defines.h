@@ -57,8 +57,12 @@ case number:                                    \
 
 #undef OP1
 #undef OP2
-#undef POP
-#undef PUSH
+#undef OPPTR
+#undef CURRENT_POS
+#undef POP_DATA
+#undef POP_ADDR
+#undef PUSH_DATA
+#undef PUSH_ADDR
 #undef GET_ARG
 #undef GET_ARG_POP
 #undef JMP
