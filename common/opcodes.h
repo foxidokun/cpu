@@ -4,24 +4,24 @@
 
 #define _CMD_DEF_ONE_OP(name, number, func)     \
     CMD_DEF (name, number, {                    \
-        POP (OP1);                             \
+        POP (OP1);                              \
         OP1 = func (OP1);                       \
-        PUSH (OP1);                            \
+        PUSH (OP1);                             \
     })                                          \
 
 #define _CMD_DEF_ARTHM(name, number, oper, check)   \
     CMD_DEF (name, number, {                        \
-        POP (OP2);                                 \
-        POP (OP1);                                 \
+        POP (OP2);                                  \
+        POP (OP1);                                  \
         {check};                                    \
         OP1 = OP1 oper OP2;                         \
-        PUSH (OP1);                                \
+        PUSH (OP1);                                 \
     })                                              \
 
 #define _CMD_DEF_JMP_IF(name, number, cond)         \
     CMD_DEF (name, number, {                        \
-        POP (OP2);                                 \
-        POP (OP1);                                 \
+        POP (OP2);                                  \
+        POP (OP1);                                  \
         if (OP1 cond OP2)                           \
         {                                           \
             _JMP(GET_ARG ());                       \
