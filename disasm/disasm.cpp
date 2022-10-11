@@ -52,11 +52,17 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
     return DISASM_ERRORS::OK;
 }
 
+//TODO вынести в функцию внутренность
+
 #define CMD_DEF(name, number, unused, req_arg)                          \
 if (cmd.opcode == number)                                               \
 {                                                                       \
     strcpy (buf, #name);                                                \
     command_len = (unsigned int) strlen (#name);                        \
+    buf += command_len;                                                 \
+    cnt += command_len;                                                 \
+    code = (const char *) code + sizeof (opcode_t);                     \
+    *code_shift = sizeof (opcode_t);                                    \
                                                                         \
     if (req_arg)                                                        \
     {                                                                   \
@@ -64,8 +70,8 @@ if (cmd.opcode == number)                                               \
         buf ++;                                                         \
         cnt ++;                                                         \
         tmp_cnt = write_arg (&cmd, buf, code, code_shift);              \
-        cnt +=  tmp_cnt;                                                \
         buf +=  tmp_cnt;                                                \
+        cnt +=  tmp_cnt;                                                \
     }                                                                   \
 } else
 
@@ -90,11 +96,6 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
                                             //
     // End magic section                    //
     //**************************************//
-
-    buf += command_len;
-    cnt += command_len;
-    code = (const char *) code + sizeof (opcode_t);
-    *code_shift = sizeof (opcode_t);
 
     buf[0] = '\n';
     cnt++;
