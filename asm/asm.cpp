@@ -129,15 +129,19 @@ int translate_command (void *const buf, const char *line, code_t *code)
     instr_ptr->r = false;
     instr_ptr->i = false;
 
-    // IF - ELSE section
-
-    #include "../common/opcodes.h"
-
-    /*else*/ if (try_to_parse_label (code, line - cmd_len,
-                                    (int) (buf_c - (char *) code->mcode)))
-    {
-            command_not_found = false;
-    }
+    //***********************************************************************//
+    // IF - ELSE section (magic section)                                     //
+                                                                             //
+    #include "../common/opcodes.h"                                           //
+                                                                             // 
+    /*else*/ if (try_to_parse_label (code, line - cmd_len,                   //
+                                    (int) (buf_c - (char *) code->mcode)))   //
+    {                                                                        //
+            command_not_found = false;                                       //
+    }                                                                        //
+                                                                             //
+    // End of magic section                                                  //
+    //***********************************************************************//
 
     // Parsing argument if needed
 
