@@ -56,7 +56,7 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
 if (cmd.opcode == number)                                               \
 {                                                                       \
     strcpy (buf, #name);                                                \
-    command_len = (unsigned int) strlen (COMMAND_NAMES[cmd.opcode]);    \
+    command_len = (unsigned int) strlen (#name);                        \
 } else 
 
 int translate_command (char *buf, const void *code, size_t *code_shift)

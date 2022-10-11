@@ -51,14 +51,6 @@ enum OPCODE
     _OPCODE_CNT_
 };
 
-#define CMD_DEF(name, ...) #name ,
-
-const char COMMAND_NAMES[][MAX_OPCODE_LEN+1] = {
-    #include "opcodes.h"
-    };
-
-#undef CMD_DEF
-
 enum class BIN_ERROR
 {
     OK = 0,
