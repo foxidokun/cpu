@@ -15,7 +15,8 @@ enum class CPU_ERRORS
     OK      = 0,
     SYNTAX,
     NOMEM,
-    INTERNAL_ERROR
+    INTERNAL_ERROR,
+    ZERO_DIV
 };
 
 struct cpu_t

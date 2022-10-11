@@ -29,58 +29,10 @@ CPU_ERRORS run_binary (const void *binary, size_t binary_size)
     return exec_res;
 }
 
-#define _STK_UNWRAP(expr)                                                               \
-{                                                                                       \
-    err_flags _stack_res = expr;                                                        \
-    if (_stack_res != res::OK)                                                          \
-    {                                                                                   \
-        if (_stack_res == res::EMPTY)                                                   \
-        {                                                                               \
-            log (log::ERR, "Syntax error: not enough data in stack for operation");     \
-            return CPU_ERRORS::SYNTAX;                                                  \
-        }                                                                               \
-        else                                                                            \
-        {                                                                               \
-            log (log::ERR, "Internal stack errors:");                                   \
-            stack_perror (_stack_res, get_log_stream(), "\t->");                        \
-            return CPU_ERRORS::INTERNAL_ERROR;                                          \
-        }                                                                               \
-    }                                                                                   \
-}
-
-#define _ARTHM(opcode, oper)                     \
-case opcode:                                     \
-    _STK_UNWRAP (stack_pop (&cpu->stk, &op2));   \
-    _STK_UNWRAP (stack_pop (&cpu->stk, &op1));   \
-    op1 = op1 oper op2;                          \
-    _STK_UNWRAP (stack_push(&cpu->stk, &op1));   \
-    break;                                       \
-
-#define _ONE_EL_FUNC(opcode, func)               \
-case opcode:                                     \
-    _STK_UNWRAP (stack_pop (&cpu->stk, &op1));   \
-    op1 = func (op1);                            \
-    _STK_UNWRAP (stack_push(&cpu->stk, &op1));   \
-    break; 
-
-#define _JMP_CODE()                                       \
-cpu->in = (unsigned int) extract_arg (cpu, instruct);\
-log (log::DBG, "Jumping to %d", cpu->in);
-
-
-#define _JMP_IF(opcode, oper)                    \
-case opcode:                                     \
-    _STK_UNWRAP (stack_pop (&cpu->stk, &op2));   \
-    _STK_UNWRAP (stack_pop (&cpu->stk, &op1));   \
-    if (op1 oper op2)                            \
-    {                                            \
-        _JMP_CODE()                              \
-    }                                            \
-    else                                         \
-    {                                            \
-        cpu->in += sizeof (int);                 \
-    }                                            \
-    break;
+#ifdef CLEANUP_DEFINES
+    #undef CLEANUP_DEFINES
+#endif
+#include "cpu_defines.h"
 
 CPU_ERRORS execute (cpu_t *const cpu)
 {
@@ -95,67 +47,23 @@ CPU_ERRORS execute (cpu_t *const cpu)
         instruct = (const opcode_t *) (cpu->code + cpu->in);
         cpu->in += sizeof (opcode_t);
 
-        log (log::DBG, "Decoding opcode %2d (%*s)", instruct->opcode, MAX_OPCODE_LEN, COMMAND_NAMES[instruct->opcode]);
-
         switch (instruct->opcode) {
-            case HLT:
-                return CPU_ERRORS::OK;
-                break;
 
-            case PUSH:
-                op1 = extract_arg (cpu, instruct);
-                _STK_UNWRAP (stack_push (&cpu->stk, &op1));
-                break;
-
-            case POP:
-                op_ptr = extract_arg_pop (cpu, instruct);
-                if (op_ptr == nullptr)
-                {
-                    log (log::ERR, "Invalid pop argument");
-                    return CPU_ERRORS::SYNTAX;
-                }
-                _STK_UNWRAP (stack_pop (&cpu->stk, op_ptr));
-                break;
-
-            _ARTHM(ADD, +)
-            _ARTHM(SUB, -)
-            _ARTHM(DIV, /)
-            _ARTHM(MUL, *)
-
-            _ONE_EL_FUNC(INC, ++);
-            _ONE_EL_FUNC(DEC, --);
-            _ONE_EL_FUNC(ZXC, -7 +);
-            
-            case JMP:
-                _JMP_CODE();
-                break;
-
-            _JMP_IF (JA,  > );
-            _JMP_IF (JAE, >=);
-            _JMP_IF (JB,  < );
-            _JMP_IF (JBE, <=);
-            _JMP_IF (JE,  ==);
-            _JMP_IF (JNE, !=);
-
-            case OUT:
-                _STK_UNWRAP (stack_pop (&cpu->stk, &op1));
-                printf ("you really can't calculate %i without calc?\n", op1);
-                break;
-
-            case INP:
-                printf ("Stupid programmer decided to ask you for a number at runtime: \n");
-                scanf ("%i", &op1);
-                _STK_UNWRAP (stack_push (&cpu->stk, &op1));
-                break;
+            #include "../common/opcodes.h"
 
             default:
-                assert (0 && "Imposible route");
+                log (log::ERR, "Invalid opcode");
+                return CPU_ERRORS::SYNTAX;
         }
     }
 
     log (log::WRN, "No halt opcode in binary");
     return CPU_ERRORS::OK;
 }
+
+#define CLEANUP_DEFINES
+#include "cpu_defines.h"
+#undef CLEANUP_DEFINES
 
 int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
 {
