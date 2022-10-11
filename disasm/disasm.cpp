@@ -52,27 +52,10 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
     return DISASM_ERRORS::OK;
 }
 
-//TODO вынести в функцию внутренность
-
-#define CMD_DEF(name, number, unused, req_arg)                          \
-if (cmd.opcode == number)                                               \
-{                                                                       \
-    strcpy (buf, #name);                                                \
-    command_len = (unsigned int) strlen (#name);                        \
-    buf += command_len;                                                 \
-    cnt += command_len;                                                 \
-    code = (const char *) code + sizeof (opcode_t);                     \
-    *code_shift = sizeof (opcode_t);                                    \
-                                                                        \
-    if (req_arg)                                                        \
-    {                                                                   \
-        buf[0] = ' ';                                                   \
-        buf ++;                                                         \
-        cnt ++;                                                         \
-        tmp_cnt = write_arg (&cmd, buf, code, code_shift);              \
-        buf +=  tmp_cnt;                                                \
-        cnt +=  tmp_cnt;                                                \
-    }                                                                   \
+#define CMD_DEF(name, number, unused, req_arg)                   \
+if (cmd.opcode == number)                                        \
+{                                                                \
+    cnt += write_command (&cmd, buf, code, code_shift, #name, req_arg); \
 } else
 
 int translate_command (char *buf, const void *code, size_t *code_shift)
@@ -80,9 +63,7 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     assert (buf  != nullptr && "pointer can't be null");
     assert (code != nullptr && "pointer can't be null");
 
-    unsigned int command_len = 0;
-    unsigned int cnt         = 0;
-    unsigned int tmp_cnt     = 0;
+    unsigned int cnt = 0;
     opcode_t cmd     = *(const opcode_t *) code;
 
     //**************************************//
@@ -97,11 +78,45 @@ int translate_command (char *buf, const void *code, size_t *code_shift)
     // End magic section                    //
     //**************************************//
 
-    buf[0] = '\n';
+    buf[cnt] = '\n';
     cnt++;
 
     assert (cnt <= RESERVED_BUF_SIZE && "cnt > RESERVED_BUF_SIZE, possible out-of-array access");
     return (int) cnt;
+}
+
+unsigned int write_command (const opcode_t *instr, char *buf, const void *code, size_t *code_shift,
+                            const char *const opcode_name, bool req_arg)
+{
+    assert (instr       != nullptr && "pointer can't be null");
+    assert (buf         != nullptr && "pointer can't be null");
+    assert (code        != nullptr && "pointer can't be null");
+    assert (code_shift  != nullptr && "pointer can't be null");
+    assert (opcode_name != nullptr && "pointer can't be null");
+
+
+    unsigned int write_cnt = 0;
+    unsigned int   tmp_cnt = 0;
+
+    strcpy (buf, opcode_name);
+    unsigned int  command_len = (unsigned int) strlen (opcode_name);
+    write_cnt  += command_len;
+    buf        += command_len;
+
+    code = (const char *) code + sizeof (opcode_t);
+    *code_shift = sizeof (opcode_t);
+
+    if (req_arg)
+    {
+        buf[0] = ' ';
+        buf++;
+        write_cnt++;
+        tmp_cnt = write_arg (instr, buf, code, code_shift);
+        buf       += tmp_cnt;
+        write_cnt += tmp_cnt;
+    }
+
+    return write_cnt;
 }
 
 unsigned int write_arg (const opcode_t *instr, char *buf, const void *code, size_t *code_shift)

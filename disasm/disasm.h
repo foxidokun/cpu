@@ -24,4 +24,6 @@ int translate_command (char *buf, const void *code, size_t *code_shift);
 
 unsigned int write_arg (const opcode_t *instr, char *buf, const void *code, size_t *code_shift);
 
+unsigned int write_command (const opcode_t *instr, char *buf, const void *code, size_t *code_shift,
+                            const char *const opcode_name, bool req_arg);
 #endif
