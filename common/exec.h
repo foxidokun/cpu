@@ -51,27 +51,13 @@ enum OPCODE
     _OPCODE_CNT_
 };
 
-const char COMMAND_NAMES[OPCODE::_OPCODE_CNT_][MAX_OPCODE_LEN+1] = {
-    "halt",
-    "push",
-    "pop" ,
-    "add" ,
-    "sub" ,
-    "div" ,
-    "mul" ,
-    "inc" ,
-    "dec" ,
-    "out" ,
-    "inp" ,
-    "jmp" ,
-    "ja"  ,
-    "jae" ,
-    "jb"  ,
-    "jbe" ,
-    "je"  ,
-    "jne",
-    "zxc"
+#define CMD_DEF(name, ...) #name ,
+
+const char COMMAND_NAMES[][MAX_OPCODE_LEN+1] = {
+    #include "opcodes.h"
     };
+
+#undef CMD_DEF
 
 enum class BIN_ERROR
 {
