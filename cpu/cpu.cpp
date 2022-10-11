@@ -54,7 +54,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
             #include "../common/opcodes.h"
 
             default:
-                log (log::ERR, "Invalid opcode");
+                log (log::ERR, "Invalid opcode %d (0x%x)", instruct->opcode, instruct->opcode);
                 return CPU_ERRORS::SYNTAX;
         }
     }
