@@ -52,45 +52,52 @@ DISASM_ERRORS disassembly (char **const dest, size_t *const buf_size, const void
     return DISASM_ERRORS::OK;
 }
 
+#define CMD_DEF(name, number, ...)                                      \
+if (cmd.opcode == number)                                               \
+{                                                                       \
+    strcpy (buf, #name);                                                \
+    command_len = (unsigned int) strlen (COMMAND_NAMES[cmd.opcode]);    \
+} else 
+
 int translate_command (char *buf, const void *code, size_t *code_shift)
 {
     assert (buf  != nullptr && "pointer can't be null");
     assert (code != nullptr && "pointer can't be null");
 
+    unsigned int command_len = 0;
     unsigned int cnt = 0;
     int tmp_cnt      = 0;
     opcode_t cmd     = *(const opcode_t *) code;
-    if (cmd.opcode >= _OPCODE_CNT_) return -1;
 
-    strcpy (buf, COMMAND_NAMES[cmd.opcode]);
-    unsigned int command_len = (unsigned int) strlen (COMMAND_NAMES[cmd.opcode]);
+    //**************************************//
+    // IF-ELSE section (define magic)       //
+                                            //
+    #include "../common/opcodes.h"          //
+                                            //
+    /*else*/ {                              //
+        return -1;                          //
+    }                                       //
+                                            //
+    // End magic section                    //
+    //**************************************//
+
     buf += command_len;
     cnt += command_len;
     code = (const char *) code + sizeof (opcode_t);
     *code_shift = sizeof (opcode_t); 
 
-    // Commands that require special actions
-    switch (cmd.opcode)
+    // Commands that require args
+
+    if (cmd.opcode == PUSH || cmd.opcode == POP || cmd.opcode == JMP ||
+        cmd.opcode == JA   || cmd.opcode == JAE || cmd.opcode == JB ||
+        cmd.opcode == JBE  || cmd.opcode == JE  || cmd.opcode == JNE)
     {
-        case PUSH:
-        case POP:
-        case JMP:
-        case JA:
-        case JAE:
-        case JB:
-        case JBE:
-        case JE:
-        case JNE:
-            buf[0] = ' ';
-            buf ++;
-            cnt ++;
-            tmp_cnt = write_arg (&cmd, buf, code, code_shift);
-            cnt += (unsigned) tmp_cnt;
-            buf += (unsigned) tmp_cnt;
-            break;
-        
-        default:
-            break;
+        buf[0] = ' ';
+        buf ++;
+        cnt ++;
+        tmp_cnt = write_arg (&cmd, buf, code, code_shift);
+        cnt += (unsigned) tmp_cnt;
+        buf += (unsigned) tmp_cnt;
     }
 
     buf[0] = '\n';
