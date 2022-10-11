@@ -105,7 +105,7 @@ void free_code (code_t *code)
         command_not_found = false;                      \
     } else
 
-#define _IS_OPCODE (name) instr_ptr.opcode == name
+#define _IS_OPCODE(name) instr_ptr->opcode == name
 
 int translate_command (void *const buf, const char *line, code_t *code)
 {
@@ -152,7 +152,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
             if (ret_code == ERROR && code->n_pass != 0) return ERROR;
 
             buf_c += sizeof(int);
-        } else if (instr_ptr == POP && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
+        } else if (instr_ptr->opcode == POP && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
             return ERROR;
         } else {
             buf_c += ret_code;
