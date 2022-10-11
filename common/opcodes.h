@@ -79,11 +79,12 @@ _CMD_DEF_JMP_IF (jbe, 15, <=)
 _CMD_DEF_JMP_IF (je,  16, ==)
 _CMD_DEF_JMP_IF (jne, 17, !=)
 
-_CMD_DEF_ONE_OP (zxc, 18, ++)
+_CMD_DEF_ONE_OP (zxc, 18, -7 + )
 
 CMD_DEF (call, 19, {
+    OP1 = GET_ARG ();
     PUSH_ADDR (&CURRENT_POS);
-    JMP (GET_ARG ());
+    JMP (OP1);
 }, 1)
 
 CMD_DEF (ret, 20, {
