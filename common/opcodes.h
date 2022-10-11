@@ -24,12 +24,12 @@
         POP (OP1);                                  \
         if (OP1 cond OP2)                           \
         {                                           \
-            _JMP(GET_ARG ());                       \
+            JMP(GET_ARG ());                        \
         }                                           \
     })                                              \
 
 CMD_DEF (halt,  0, { HLT; })
-CMD_DEF (push, 1, { PUSH (GET_ARG    ()); })
+CMD_DEF (push, 1, { PUSH (GET_ARG    ());  })
 CMD_DEF (pop,  2, { POP  (GET_ARG_POP());  })
 
 _CMD_DEF_ARTHM (add, 3, +, ;)
@@ -56,7 +56,7 @@ CMD_DEF (inp, 10, {
 })
 
 CMD_DEF (jmp, 11, {
-    _JMP (GET_ARG ())
+    JMP (GET_ARG ())
 })
 
 _CMD_DEF_JMP_IF (ja,  12, > )
