@@ -28,7 +28,7 @@
         }                                           \
     })                                              \
 
-CMD_DEF (hlt,  0, { HLT; })
+CMD_DEF (halt,  0, { HLT; })
 CMD_DEF (push, 1, { PUSH (GET_ARG    ()); })
 CMD_DEF (pop,  2, { POP  (GET_ARG_POP());  })
 
@@ -50,12 +50,12 @@ CMD_DEF (out, 9, {
     OUT (OP1);
 })
 
-CMD_DEF (INP, 10, {
+CMD_DEF (inp, 10, {
     INP  (&OP1);
     PUSH (&OP1);
 })
 
-CMD_DEF (JMP, 11, {
+CMD_DEF (jmp, 11, {
     _JMP (GET_ARG ())
 })
 

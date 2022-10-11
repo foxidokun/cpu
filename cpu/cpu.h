@@ -36,7 +36,7 @@ CPU_ERRORS cpu_free (cpu_t *cpu);
 
 CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size);
 
-int extract_arg (cpu_t *cpu, const opcode_t *const instruct);
+int  extract_arg (cpu_t *cpu, const opcode_t *const instruct);
 int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct);
 
 #endif //CPU_H
