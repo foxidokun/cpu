@@ -26,12 +26,15 @@ case number:                                    \
     {code};                                     \
     break;
 
-#define OP1   op1
-#define OP2   op2
-#define OPPTR op_ptr
+#define OP1         op1
+#define OP2         op2
+#define OPPTR       op_ptr
+#define CURRENT_POS cpu->in
 
-#define POP(arg)  _STK_UNWRAP(stack_pop  (&cpu->stk, arg))
-#define PUSH(arg) _STK_UNWRAP(stack_push (&cpu->stk, arg))
+#define POP_DATA(arg)  _STK_UNWRAP(stack_pop  (&cpu->data_stk, arg))
+#define POP_ADDR(arg)  _STK_UNWRAP(stack_pop  (&cpu->addr_stk, arg))
+#define PUSH_DATA(arg) _STK_UNWRAP(stack_push (&cpu->data_stk, arg))
+#define PUSH_ADDR(arg) _STK_UNWRAP(stack_push (&cpu->addr_stk, arg))
 
 #define GET_ARG()     extract_arg     (cpu, instruct)
 #define GET_ARG_POP() extract_arg_pop (cpu, instruct)

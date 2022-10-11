@@ -5,6 +5,8 @@
 #include "../stack/log.h"
 #include "cpu.h"
 
+static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name);
+
 CPU_ERRORS run_binary (const void *binary, size_t binary_size)
 {
     assert (binary != nullptr && "pointer can't be null");
@@ -123,7 +125,8 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
     cpu->code      = (const char *) code;
     cpu->code_size = code_size;
     cpu->in        = 0;
-    stack_ctor (&cpu->stk, sizeof (int));
+    stack_ctor (&cpu->data_stk, sizeof (int));
+    stack_ctor (&cpu->addr_stk, sizeof (int));
 
     return CPU_ERRORS::OK;
 }
@@ -132,17 +135,28 @@ CPU_ERRORS cpu_free (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
 
-    err_flags dtor_res = stack_dtor (&cpu->stk);
-    if (dtor_res != res::OK)
+    if (stack_dtor_unwrap (&cpu->addr_stk, "addr_stk") != CPU_ERRORS::OK)
     {
-        log (log::ERR, "Failed to destruct internal stack. Stack errors:");
-        stack_perror (dtor_res, get_log_stream(), "\t\t-->");
+        return CPU_ERRORS::INTERNAL_ERROR;
+    }
+    
+    if (stack_dtor_unwrap (&cpu->addr_stk, "data_stk") != CPU_ERRORS::OK)
+    {
         return CPU_ERRORS::INTERNAL_ERROR;
     }
 
     return CPU_ERRORS::OK;
 }
 
-#undef _ARTHM
-#undef _TWO_EL_FUNC
-#undef _ONE_EL_FUNC
+static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name)
+{
+    err_flags dtor_res = stack_dtor (stk);
+    if (dtor_res != res::OK)
+    {
+        log (log::ERR, "Failed to destruct internal stack (%s). Stack errors:", stk_name);
+        stack_perror (dtor_res, get_log_stream(), "\t\t-->");
+        return CPU_ERRORS::INTERNAL_ERROR;
+    }
+
+    return CPU_ERRORS::OK;
+}

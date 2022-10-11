@@ -22,7 +22,8 @@ enum class CPU_ERRORS
 struct cpu_t
 {
     const char* code;
-    stack_t stk;
+    stack_t data_stk;
+    stack_t addr_stk;
     int regs[REG_CNT];
     int ram[TOTAL_RAM_SIZE];
     size_t code_size;

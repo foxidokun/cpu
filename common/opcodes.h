@@ -2,34 +2,36 @@
 #error "No CMD_DEF macros"
 #endif
 
-#define _CMD_DEF_ONE_OP(name, number, func)     \
-    CMD_DEF (name, number, {                    \
-        POP (&OP1);                             \
-        OP1 = func (OP1);                       \
-        PUSH (&OP1);                            \
-    }, 0)                                       \
+/// Requires CMD_DEF macros with 4 parameters: opcode name, number, code, and (bool) is argument required
 
-#define _CMD_DEF_ARTHM(name, number, oper, check)   \
-    CMD_DEF (name, number, {                        \
-        POP (&OP2);                                 \
-        POP (&OP1);                                 \
-        {check};                                    \
-        OP1 = OP1 oper OP2;                         \
-        PUSH (&OP1);                                \
-    }, 0)                                           \
+#define _CMD_DEF_ONE_OP(name, number, func) \
+    CMD_DEF (name, number, {                \
+        POP_DATA (&OP1);                    \
+        OP1 = func (OP1);                   \
+        PUSH_DATA (&OP1);                   \
+    }, 0)                                   \
 
-#define _CMD_DEF_JMP_IF(name, number, cond)         \
-    CMD_DEF (name, number, {                        \
-        POP (&OP2);                                 \
-        POP (&OP1);                                 \
-        if (OP1 cond OP2)                           \
-        {                                           \
-            JMP(GET_ARG ());                        \
-        }                                           \
-    }, 1)                                           \
+#define _CMD_DEF_ARTHM(name, number, oper, check) \
+    CMD_DEF (name, number, {                      \
+        POP_DATA (&OP2);                          \
+        POP_DATA (&OP1);                          \
+        {check};                                  \
+        OP1 = OP1 oper OP2;                       \
+        PUSH_DATA (&OP1);                         \
+    }, 0)                                         \
+
+#define _CMD_DEF_JMP_IF(name, number, cond) \
+    CMD_DEF (name, number, {                \
+        POP_DATA (&OP2);                    \
+        POP_DATA (&OP1);                    \
+        if (OP1 cond OP2)                   \
+        {                                   \
+            JMP(GET_ARG ());                \
+        }                                   \
+    }, 1)                                   \
 
 CMD_DEF (halt, 0, { HLT (); }, 0)
-CMD_DEF (push, 1, { OP1 = GET_ARG ();    PUSH (&OP1);  }, 1)
+CMD_DEF (push, 1, { OP1 = GET_ARG (); PUSH_DATA (&OP1); }, 1)
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();
     if (OPPTR == nullptr)
@@ -39,7 +41,7 @@ CMD_DEF (pop,  2, {
     }
     else
     {
-        POP  (OPPTR);
+        POP_DATA (OPPTR);
     }
 }, 1)
 
@@ -57,13 +59,13 @@ _CMD_DEF_ONE_OP (inc, 7,  ++)
 _CMD_DEF_ONE_OP (dec, 8,  ++)
 
 CMD_DEF (out, 9, {
-    POP (&OP1);
+    POP_DATA (&OP1);
     OUT (OP1);
 }, 0)
 
 CMD_DEF (inp, 10, {
     INP  (OP1);
-    PUSH (&OP1);
+    PUSH_DATA (&OP1);
 }, 0)
 
 CMD_DEF (jmp, 11, {
@@ -78,3 +80,13 @@ _CMD_DEF_JMP_IF (je,  16, ==)
 _CMD_DEF_JMP_IF (jne, 17, !=)
 
 _CMD_DEF_ONE_OP (zxc, 18, ++)
+
+CMD_DEF (call, 19, {
+    PUSH_ADDR (&CURRENT_POS);
+    JMP (GET_ARG ());
+}, 1)
+
+CMD_DEF (ret, 20, {
+    POP_ADDR (&OP1);
+    JMP (OP1);
+}, 1)
