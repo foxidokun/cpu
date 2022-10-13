@@ -187,7 +187,8 @@ int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str,
         }
     }
 
-    return buf_c - (char *)buf;
+    assert (buf_c - (char *)buf < INT_MAX && "Too long bytecode for this opcode");
+    return (int) (buf_c - (char *)buf);
 }
 
 #define _SKIP_SPACE                                 \
