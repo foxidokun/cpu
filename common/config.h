@@ -15,8 +15,9 @@ const size_t LABEL_START_CAPACITY  = 10;
 
 const unsigned int BAD_JMP_ADDR = -1u;
 
-const int VRAM_WIDTH       = 100;
-const int VRAM_HEIGHT      = 100;
-const int TOTAL_RAM_SIZE   = VRAM_WIDTH * VRAM_HEIGHT;
+const int VRAM_WIDTH       = 56;
+const int VRAM_HEIGHT      = 210;
+const int PURE_RAM         = 5000;
+const int TOTAL_RAM_SIZE   = VRAM_WIDTH * VRAM_HEIGHT + PURE_RAM;
 
 #endif
