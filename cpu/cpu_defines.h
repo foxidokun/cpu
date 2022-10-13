@@ -49,6 +49,8 @@ case number:                                    \
 #define OUT(arg) printf ("you really can't calculate %i without calc?\n", arg)
 #define DUMP()   printf ("\n\n"); dump_cpu (cpu); printf ("Press any key to continue"); scanf("%c", &op1); printf ("\033[2J");
 
+#define SQRT (int) sqrt
+
 #define ERRLOG(fmt, ...) log (log::ERR, fmt, ##__VA_ARGS__)
 
 #else

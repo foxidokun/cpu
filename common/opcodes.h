@@ -97,3 +97,5 @@ CMD_DEF (ret, 20, {
 CMD_DEF (dump, 21, {
     DUMP ();
 }, 0)
+
+_CMD_DEF_ONE_OP (sqrt, 22, SQRT)
