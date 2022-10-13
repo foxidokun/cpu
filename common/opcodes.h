@@ -49,7 +49,7 @@ CMD_DEF (pop,  2, {
 
 _CMD_DEF_ARTHM (add, 3, +, ;)
 _CMD_DEF_ARTHM (sub, 4, -, ;)
-_CMD_DEF_ARTHM (div, 5, -, {
+_CMD_DEF_ARTHM (div, 5, /, {
     if (OP2 == 0) {
         log (log::ERR, "Zero division error");
         ZERODIV();
@@ -58,7 +58,7 @@ _CMD_DEF_ARTHM (div, 5, -, {
 _CMD_DEF_ARTHM (mul, 6, *, ;)
 
 _CMD_DEF_ONE_OP (inc, 7,  ++)
-_CMD_DEF_ONE_OP (dec, 8,  ++)
+_CMD_DEF_ONE_OP (dec, 8,  --)
 
 CMD_DEF (out, 9, {
     POP_DATA (&OP1);
