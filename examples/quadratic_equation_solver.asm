@@ -1,4 +1,4 @@
-float_mult equ 100000
+float_mult equ 1000
 
 ; //Loop with inp (for rax = 3; rax > 0; ++rax)
 push 3
@@ -42,16 +42,22 @@ read_inp:
     mul
     mul
     add
+    pop  rdx
+    push rdx
 
+    push rdx
     push 0
     je zero_d
 
     push rdx
+    push 0
+    jb bright_future
+
     sqrt
     push 2
     push rax
     mul
-    div
+    call divf
     pop rdx
 
     push -1
@@ -60,7 +66,7 @@ read_inp:
     push 2
     push rax
     mul
-    div
+    call divf
 ;// Destroy rax with -b/2a
     pop rax
 
@@ -77,11 +83,15 @@ read_inp:
     jmp bright_future
 
 zero_a:
+    push rbx
+    push 0
+    je bright_future
+
     push rcx
     push -1
     mul
     push rbx
-    div
+    call divf
 
     call print
     jmp bright_future
@@ -95,28 +105,21 @@ zero_d:
     push rax
     mul
 
-    div
+    call divf
 
     call print
     jmp bright_future
 
 print:
-    pop  rex
-    push rex
-
-    push rex
-    push float_mult
-    div
-
-    pop  rex
-    push rex
-    push rex
     out
+    ret
 
+divf:
+    pop rex
     push float_mult
     mul
-    sub
-    out
+    push rex
+    div
     ret
 
 bright_future:
