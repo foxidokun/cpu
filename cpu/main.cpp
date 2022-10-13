@@ -9,7 +9,7 @@
 
 int main (int argc, char *argv[])
 {
-    set_log_level  (log::DBG);
+    set_log_level  (log::INF);
 
     if ((argc != 2) || (argc == 2 && strcmp (argv[1], "-h") == 0))
     {
