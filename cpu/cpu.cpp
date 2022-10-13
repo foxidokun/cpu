@@ -229,7 +229,7 @@ void render_video (cpu_t *cpu)
         {
             mem_cell = ((unsigned) cpu->ram[VRAM_WIDTH*y + x]) % 256;
 
-            printf ("\033[38;5;%dm" "x" "\033[48;5;0m", mem_cell);
+            printf ("\033[48;5;%dm" " " "\033[48;5;0m", mem_cell);
         }
 
         putchar ('\n');
