@@ -352,7 +352,7 @@ int write_binary (FILE *stream, const struct code_t *code)
 
     size_t size_written  = fwrite (&code->pre_header, 1,  sizeof (pre_header_t), stream);
     size_written        += fwrite (&code->header,     1,  sizeof (    header_t), stream);
-    size_written        += fwrite (code->mcode,      1, code->header.code_size, stream);
+    size_written        += fwrite (code->mcode,       1, code->header.code_size, stream);
 
     if (size_written != bin_size) return ERROR;
     else                          return 0;
