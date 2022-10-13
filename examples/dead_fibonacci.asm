@@ -24,10 +24,11 @@ fib:
 	push rax
 	call check_for_caching
 
-;// If no
+;// If can't
 	push 0
 	je no_ram_load
 
+;// Use cache if it exists
 	push [rax]
 	push 0
 	jne return_from_ram
@@ -39,7 +40,8 @@ no_ram_load:
 	pop  rax
 	push rax
 
-;// Call fib
+;// Call fib func
+
 	push rax
 	call fib
 
@@ -53,7 +55,7 @@ no_ram_load:
 	dec
 
 ;// Duplicate n (n-2) on head 
-	pop rax
+	pop  rax
 	push rax
 	push rax
 
@@ -101,7 +103,7 @@ return_from_ram:
 check_for_caching:
 ;// USE ONLY rdx
 ;// Check for i = 0 mod 3
-;// what is equal with 
+;// what is equal
 ;// i =?= (i/3)*3
 
 	pop  rdx

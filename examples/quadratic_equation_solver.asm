@@ -1,6 +1,6 @@
-float_mult equ 1000
+float_mult equ 100000
 
-; //Loop with inp (for rax = 3; rax > 0; ++rax)
+; //Loop (for (rax = 3; rax > 0; ++rax) {scanf})
 push 3
 pop rax
 
@@ -45,20 +45,25 @@ read_inp:
     pop  rdx
     push rdx
 
+;// D == 0
     push rdx
     push 0
     je zero_d
 
+;// D < 0
     push rdx
     push 0
     jb bright_future
 
+;// D => sqrt(D)/2a
     sqrt
     push 2
     push rax
     mul
     call divf
     pop rdx
+
+;// Calc -b/2a
 
     push -1
     push rbx
@@ -67,7 +72,8 @@ read_inp:
     push rax
     mul
     call divf
-;// Destroy rax with -b/2a
+
+;// rax = -b/2a
     pop rax
 
     push rax
