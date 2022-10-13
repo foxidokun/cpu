@@ -4,6 +4,33 @@
 
 /// Requires CMD_DEF macros with 4 parameters: opcode name, number, code, and (bool) is argument required
 
+// b = pop(stk), a = pop (stk), typeof (a, b) = int
+//
+// 00  halt       -- stop programm
+// 01  push <arg> -- push arg to stack
+// 02  pop  <arg> -- pop arg from stack
+// 03  add        -- push (a + b)
+// 04  sub        -- push (a - b)
+// 05  div        -- push (a / b)
+// 06  mul        -- push (a * b)
+// 07  inc        -- push (a++)
+// 08  dec        -- push (a--)
+// 09  out        -- printf (a)
+// 10  inp        -- push (scanf())
+// 11  jmp        -- jump
+// 12  ja         -- jump a >  b
+// 13  jae        -- jump a >= b
+// 14  jb         -- jump a <  b
+// 15  jbe        -- jump a <= b
+// 16  je         -- jump a == b
+// 17  jne        -- jump a != b
+// 18  zxc        -- push (a - 7)
+// 19  call       -- jmp & remember pos
+// 20  ret        -- jmp to loaded pos
+// 21  dump       -- dump cpu internal data
+// 22  sqrt       -- push (sqrt (a))
+
+
 #define _CMD_DEF_ONE_OP(name, number, func) \
     CMD_DEF (name, number, {                \
         POP_DATA (&OP1);                    \
