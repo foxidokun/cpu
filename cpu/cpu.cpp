@@ -2,10 +2,18 @@
 #include <math.h>
 
 #include "../common/exec.h"
+#include "../common/common.h"
 #include "../stack/log.h"
 #include "cpu.h"
 
+const int RAM_BYTES_BEFORE    = 4;
+const int RAM_BYTES_AFTER     = 6;
+const int DATA_STACK_RESERVED_CAPACITY  = 8;
+const int ADDR_STACK_RESERVED_CAPACITY  = 4;
+
 static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name);
+void int_printf (const void *elem, size_t elem_size, FILE *stream);
+
 
 CPU_ERRORS run_binary (const void *binary, size_t binary_size)
 {
@@ -57,6 +65,10 @@ CPU_ERRORS execute (cpu_t *const cpu)
                 log (log::ERR, "Invalid opcode %d (0x%x)", instruct->opcode, instruct->opcode);
                 return CPU_ERRORS::SYNTAX;
         }
+
+        #ifdef ALWAYS_DUMP
+            DUMP ();
+        #endif
     }
 
     log (log::WRN, "No halt opcode in binary");
@@ -86,6 +98,7 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
     }
     if (instruct->m)
     {
+        cpu->last_ram_indx = (size_t) arg;
         arg = cpu->ram[arg];
     }
 
@@ -125,8 +138,8 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
     cpu->code      = (const char *) code;
     cpu->code_size = code_size;
     cpu->in        = 0;
-    stack_ctor (&cpu->data_stk, sizeof (int));
-    stack_ctor (&cpu->addr_stk, sizeof (int));
+    stack_ctor (&cpu->data_stk, sizeof (int), DATA_STACK_RESERVED_CAPACITY, int_printf);
+    stack_ctor (&cpu->addr_stk, sizeof (int), ADDR_STACK_RESERVED_CAPACITY, int_printf);
 
     return CPU_ERRORS::OK;
 }
@@ -159,4 +172,53 @@ static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name)
     }
 
     return CPU_ERRORS::OK;
+}
+
+void dump_cpu (cpu_t *cpu)
+{
+    assert (cpu != nullptr && "pointer can't be null");
+
+
+    FILE *log_stream = get_log_stream ();
+
+    log (log::INF, R Bold "######################" D Plain);
+    log (log::INF, R Bold "#------CPU DUMP------#" D Plain);
+    log (log::INF, R Bold "######################" D Plain);
+
+    log (log::INF, "CPU insutruction byte number (starts with 1): %lu", cpu->in);
+    log (log::INF, R Bold "== == CPU REGS == ==" D Plain);
+    
+    for (int i = 0; i < REG_CNT; ++i)
+    {
+        fprintf (log_stream, "%d ", cpu->regs[i]);
+    }
+    fputc ('\n', log_stream);
+
+    log (log::INF, R Bold "== == CPU RAM == ==" D Plain);
+    log (log::INF, "CPU last ram pos: %zu", cpu->last_ram_indx);
+    size_t start_i = (size_t) MAX (0, (ssize_t) cpu->last_ram_indx - RAM_BYTES_BEFORE);
+    size_t   end_i = (size_t) MAX (0, (ssize_t) cpu->last_ram_indx + RAM_BYTES_AFTER);
+    for (size_t i = start_i; i <= end_i; ++i)
+    {
+        if (i == cpu->last_ram_indx + 1)
+        {
+            fprintf (log_stream, "[%d] ", cpu->ram[i]);
+        }
+        else
+        {
+            fprintf (log_stream, "%d ", cpu->ram[i]);
+        }
+    }
+    fputc ('\n', log_stream);
+
+    log (log::INF, "Data stack dump:");
+    stack_dump(&cpu->data_stk, log_stream);
+
+    log (log::INF, "Addr stack dump:");
+    stack_dump(&cpu->addr_stk, log_stream);
+}
+
+void int_printf (const void *elem, size_t elem_size, FILE *stream)
+{
+    fprintf (stream, "%d", *(const int *)elem);
 }

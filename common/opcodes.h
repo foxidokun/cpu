@@ -93,3 +93,7 @@ CMD_DEF (ret, 20, {
     POP_ADDR (&OP1);
     JMP (OP1);
 }, 1)
+
+CMD_DEF (dump, 21, {
+    DUMP ();
+}, 0)

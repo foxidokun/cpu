@@ -47,6 +47,7 @@ case number:                                    \
 
 #define INP(arg) printf ("Stupid programmer decided to ask you for a number at runtime: \n"); scanf ("%i", &arg)
 #define OUT(arg) printf ("you really can't calculate %i without calc?\n", arg)
+#define DUMP()   printf ("\n\n"); dump_cpu (cpu); printf ("Press any key to continue"); scanf("%c", &op1); printf ("\033[2J");
 
 #define ERRLOG(fmt, ...) log (log::ERR, fmt, ##__VA_ARGS__)
 
@@ -71,6 +72,7 @@ case number:                                    \
 #undef SYNTAX_ERROR
 #undef INP
 #undef OUT
+#undef DUMP
 #undef ERRLOG
 
 #endif
