@@ -165,6 +165,12 @@ int translate_command (void *const buf, const char *line, code_t *code)
 int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
                             const int number, const char *const name, const bool req_arg)
 {
+    assert (code      != nullptr && "pointer can't be null");
+    assert (instr_ptr != nullptr && "pointer can't be null");
+    assert (asm_str   != nullptr && "pointer can't be null");
+    assert (buf       != nullptr && "pointer can't be null");
+    assert (name      != nullptr && "pointer can't be null");
+
     char *buf_c  = (char *) buf + sizeof (opcode_t);
     int ret_code = 0;
 
