@@ -45,9 +45,13 @@ case number:                                    \
 #define HLT()          return CPU_ERRORS::OK
 #define SYNTAX_ERROR() return CPU_ERRORS::SYNTAX
 
+#define _CLEAR_SCREEN printf ("\033[2J")
+#define _PAUSE        printf ("Press any key to continue\n"); scanf("%c", &op1);
+
 #define INP(arg) printf ("Stupid programmer decided to ask you for a number at runtime: \n"); scanf ("%i", &arg)
 #define OUT(arg) printf ("you really can't calculate %i without calc?\n", arg)
-#define DUMP()   printf ("\n\n"); dump_cpu (cpu); printf ("Press any key to continue"); scanf("%c", &op1); printf ("\033[2J");
+#define DUMP()   _CLEAR_SCREEN; dump_cpu     (cpu); _PAUSE;
+#define VIDEO()  _CLEAR_SCREEN; render_video (cpu); _PAUSE;
 
 #define SQRT (int) sqrt
 

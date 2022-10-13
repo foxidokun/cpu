@@ -27,8 +27,9 @@
 // 18  zxc        -- push (a - 7)
 // 19  call       -- jmp & remember pos
 // 20  ret        -- jmp to loaded pos
-// 21  dump       -- dump cpu internal data
+// 21  dump       -- dump cpu internal data & pause
 // 22  sqrt       -- push (sqrt (a))
+// 23  video      -- render video output & pause
 
 
 #define _CMD_DEF_ONE_OP(name, number, func) \
@@ -126,3 +127,5 @@ CMD_DEF (dump, 21, {
 }, 0)
 
 _CMD_DEF_ONE_OP (sqrt, 22, SQRT)
+
+CMD_DEF (video, 23, VIDEO(), 0)

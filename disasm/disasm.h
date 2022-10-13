@@ -5,7 +5,7 @@
 #include "../file/file.h"
 #include "../common/common.h"
 
-const char BINARY_VERSION = 4;
+const char BINARY_VERSION = 6;
 const char HEADER_VERSION = 1;
 typedef header_v1_t header_t;
 

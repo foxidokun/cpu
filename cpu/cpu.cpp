@@ -178,7 +178,6 @@ void dump_cpu (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
 
-
     FILE *log_stream = get_log_stream ();
 
     log (log::INF, R Bold "######################" D Plain);
@@ -216,6 +215,28 @@ void dump_cpu (cpu_t *cpu)
 
     log (log::INF, "Addr stack dump:");
     stack_dump(&cpu->addr_stk, log_stream);
+}
+
+void render_video (cpu_t *cpu)
+{
+    assert (cpu != nullptr && "pointer can't be null");
+
+    int mem_cell = 0;
+
+    for (int y = 0; y < VRAM_WIDTH; ++y)
+    {
+        for (int x = 0; x < VRAM_WIDTH; ++x)
+        {
+            mem_cell = ((unsigned) cpu->ram[VRAM_WIDTH*y + x]) % 256;
+
+            if (cpu->ram[VRAM_WIDTH*y + x] != 0)
+            {
+                printf ("\033[48;5;%dm" " " "\033[48;5;0m", mem_cell);
+            }
+        }
+
+        putchar ('\n');
+    }
 }
 
 void int_printf (const void *elem, size_t elem_size, FILE *stream)
