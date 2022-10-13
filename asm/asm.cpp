@@ -102,12 +102,10 @@ void free_code (code_t *code)
         instr_ptr->opcode = number;                                                     \
         command_not_found = false;                                                      \
                                                                                         \
-        ret_code = translate_arg (code, instr_ptr, line, buf_c, number, #name, req_arg);\
+        ret_code = translate_arg (code, instr_ptr, line, buf_c, #name, req_arg);\
         if (ret_code == ERROR) return ERROR;                                            \
         else buf_c += ret_code;                                                         \
     } else
-
-#define _IS_OPCODE(name) instr_ptr->opcode == name
 
 int translate_command (void *const buf, const char *line, code_t *code)
 {
@@ -163,7 +161,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
 #undef CMD_DEF
 
 int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
-                            const int number, const char *const name, const bool req_arg)
+                            const char *const name, const bool req_arg)
 {
     assert (code      != nullptr && "pointer can't be null");
     assert (instr_ptr != nullptr && "pointer can't be null");

@@ -41,7 +41,7 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source);
 int translate_command (void *const buf, const char *line, code_t *code);
 
 int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
-                            const int number, const char *const name, const bool req_arg);
+                           const char *const name, const bool req_arg);
 
 int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf);
 
