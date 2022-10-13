@@ -97,27 +97,14 @@ void free_code (code_t *code)
 }
 
 #define CMD_DEF(name, number, unused, req_arg)                                          \
-    if (strcasecmp (#name, cmd) == 0)                                                    \
-    {                                                                                     \
-        instr_ptr->opcode = number;                                                        \
-                                                                                            \
-        buf_c += sizeof (opcode_t);                                                          \
-        command_not_found = false;                                                            \
-                                                                                               \
-        if (req_arg)                                                                            \
-        {                                                                                        \
-            ret_code = translate_arg(instr_ptr, line, buf_c);                                     \
-            if (ret_code == ERROR) {                                                               \
-                ret_code = translate_label(instr_ptr, line, buf_c, code->name_table);               \
-                if (ret_code == ERROR && code->n_pass != 0) return ERROR;                            \
-                                                                                                      \
-                buf_c += sizeof(int);                                                                  \
-            } else if (strcmp (#name, "pop") == 0 && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) { \
-                return ERROR;                                                                          \
-            } else {                                                                                  \
-                buf_c += ret_code;                                                                   \
-            }                                                                                      \
-        }                                                                                         \
+    if (strcasecmp (#name, cmd) == 0)                                                   \
+    {                                                                                   \
+        instr_ptr->opcode = number;                                                     \
+        command_not_found = false;                                                      \
+                                                                                        \
+        ret_code = translate_arg (code, instr_ptr, line, buf_c, number, #name, req_arg);\
+        if (ret_code == ERROR) return ERROR;                                            \
+        else buf_c += ret_code;                                                         \
     } else
 
 #define _IS_OPCODE(name) instr_ptr->opcode == name
@@ -175,6 +162,30 @@ int translate_command (void *const buf, const char *line, code_t *code)
 #undef _IS_OPCODE
 #undef CMD_DEF
 
+int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
+                            const int number, const char *const name, const bool req_arg)
+{
+    char *buf_c  = (char *) buf + sizeof (opcode_t);
+    int ret_code = 0;
+
+    if (req_arg)
+    {
+        ret_code = translate_normal_arg(instr_ptr, asm_str, buf_c);
+        if (ret_code == ERROR) {
+            ret_code = translate_label(instr_ptr, asm_str, buf_c, code->name_table);
+            if (ret_code == ERROR && code->n_pass != 0) return ERROR;
+
+            buf_c += sizeof(int);
+        } else if (strcmp (name, "pop") == 0 && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
+            return ERROR;
+        } else {
+            buf_c += ret_code;
+        }
+    }
+
+    return buf_c - (char *)buf;
+}
+
 #define _SKIP_SPACE                                 \
 {                                                   \
     while (isspace(arg_str[0]) && arg_len > 0)      \
@@ -185,7 +196,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
                                                     \
 }
 
-int translate_arg (opcode_t *const opcode, const char *arg_str, void *buf)
+int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
@@ -292,6 +303,7 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
 
     char label[MAX_LABEL_LEN+1];
     strncpy (label, line, MAX_LABEL_LEN);
+
 
     for (unsigned int i = 0; i < MAX_LABEL_LEN; ++i)
     {
