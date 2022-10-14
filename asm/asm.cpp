@@ -14,10 +14,14 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
     assert (code   != nullptr && "pointer can't be null");
     assert (source != nullptr && "pointer can't be null");
 
+    ASM_ERRORS ret = ASM_ERRORS::OK;
+
     for (int n_pass = 0; n_pass < NUM_OF_PASSES; ++n_pass)
     {
         code->header.code_size = 0;
-        one_pass_compile (code, source);
+        ret = one_pass_compile (code, source);
+        if (ret != ASM_ERRORS::OK) return ret;
+
         code->n_pass++;
     }
 
