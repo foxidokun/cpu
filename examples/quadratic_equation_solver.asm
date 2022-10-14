@@ -1,4 +1,4 @@
-float_mult equ 100000
+float_mult equ 1000
 
 ; //Loop (for (rax = 3; rax > 0; ++rax) {scanf})
 push 3
