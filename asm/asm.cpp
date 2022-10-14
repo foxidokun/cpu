@@ -313,14 +313,25 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     char label[MAX_LABEL_LEN+1];
     strncpy (label, line, MAX_LABEL_LEN);
 
+    int ret = 0;
 
     for (unsigned int i = 0; i < MAX_LABEL_LEN; ++i)
     {
         if (label[i] == ':')
         {
             label[i] = '\0';
-            hashmap_insert (code->name_table, label, i+1,
+            ret = hashmap_insert (code->name_table, label, i+1,
                         &bin_pos, sizeof (int));
+
+            if (ret == ERROR)
+            {
+                code->name_table = hashmap_resize (code->name_table,
+                                                   code->name_table->allocated * 2);
+
+                hashmap_insert (code->name_table, label, i+1,
+                                &bin_pos, sizeof (int));
+            }
+
             return true;
         }
     }
