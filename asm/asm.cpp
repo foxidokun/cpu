@@ -323,13 +323,10 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
             ret = hashmap_insert (code->name_table, label, i+1,
                         &bin_pos, sizeof (int));
 
-            if (ret == ERROR)
+            if (code->name_table->used == code->name_table->allocated)
             {
                 code->name_table = hashmap_resize (code->name_table,
                                                    code->name_table->allocated * 2);
-
-                hashmap_insert (code->name_table, label, i+1,
-                                &bin_pos, sizeof (int));
             }
 
             return true;
