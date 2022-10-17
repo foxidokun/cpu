@@ -5,8 +5,6 @@
 #include "../file/file.h"
 #include "../common/common.h"
 
-const char BINARY_VERSION = 6;
-const char HEADER_VERSION = 1;
 typedef header_v1_t header_t;
 
 const int RESERVED_BUF_SIZE = (MAX_OPCODE_LEN + 1 + sizeof ("2147483647") + 1) + 7; // command + " " + int + \n + reserve

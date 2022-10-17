@@ -4,6 +4,9 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+const int HEADER_VERSION = 1;
+const int BINARY_VERSION = 6;
+
 const int OPCODE_BIT_SIZE = 5;
 const int REG_CNT         = 8;
 

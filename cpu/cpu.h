@@ -7,9 +7,6 @@
 
 // #define ALWAYS_DUMP
 
-const int HEADER_VERSION = 1;
-const int BINARY_VERSION = 6;
-
 typedef header_v1_t header_t;
 
 enum class CPU_ERRORS
