@@ -14,7 +14,7 @@ y_loop:
     push 0
     pop rax
 
-x_loop:
+    x_loop:
         push rax
         push center_x
         sub
@@ -46,7 +46,7 @@ x_loop:
         push color
         pop [rcx]
 
-no_draw:
+      no_draw:
         push rax
         inc
         pop rax

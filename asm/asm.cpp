@@ -310,6 +310,8 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     assert (code != nullptr && "pointer can't be null");
     assert (line != nullptr && "pointer can't be null");
 
+    while (isspace(line[0])) line++;
+
     char label[MAX_LABEL_LEN+1];
     strncpy (label, line, MAX_LABEL_LEN);
 
