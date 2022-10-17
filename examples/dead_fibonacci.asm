@@ -130,4 +130,6 @@ push_true:
 	ret
 
 skip_cache:
+	pop rdx
+	push 0
     ret

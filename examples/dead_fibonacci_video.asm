@@ -1,7 +1,9 @@
 ;// a1,a2 = 1
-a1_2     equ 1
-;// Cache all
-cache_hz equ 1
+a1_2    	  equ 1
+;// Cache
+cache_enabled equ 1
+cache_hz 	  equ 3
+
 
 ;// Get n
 inp
@@ -104,6 +106,10 @@ check_for_caching:
 ;// what is equal
 ;// i =?= (i/3)*3
 
+	push cache_enabled
+	push 0
+    je skip_cache
+
 	pop  rdx
 	push rdx
 
@@ -116,10 +122,14 @@ check_for_caching:
 	je push_true
 
 	push 0
-	jmp after_true
+	ret
+
 
 push_true:
 	push 1
-
-after_true:
 	ret
+
+skip_cache:
+	pop rdx
+	push 0
+    ret
