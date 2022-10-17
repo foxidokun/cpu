@@ -1,7 +1,7 @@
 width    equ 210
 height   equ 54
 
-radius^2 equ 200
+radius^2 equ 300
 center_x equ 105
 center_y equ 27
 
