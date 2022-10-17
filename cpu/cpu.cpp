@@ -199,7 +199,7 @@ void dump_cpu (cpu_t *cpu)
     size_t   end_i = (size_t) MAX (0, (ssize_t) cpu->last_ram_indx + RAM_BYTES_AFTER);
     for (size_t i = start_i; i <= end_i; ++i)
     {
-        if (i == cpu->last_ram_indx + 1)
+        if (i == cpu->last_ram_indx)
         {
             fprintf (log_stream, "[%d] ", cpu->ram[i]);
         }
