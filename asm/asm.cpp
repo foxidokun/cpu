@@ -42,7 +42,7 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
 
     for (unsigned int i = 0; i < source->n_lines; ++i)
     {
-        if (source->lines[i].len <= 1 || source->lines[i].content[0] == ';')
+        if (source->lines[i].len <= 1 || strchr (source->lines[i].content, ';') != nullptr)
         {
             continue;
         }
