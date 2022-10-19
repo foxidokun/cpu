@@ -94,7 +94,6 @@ unsigned int write_command (const opcode_t *instr, char *buf, const void *code, 
     assert (code_shift  != nullptr && "pointer can't be null");
     assert (opcode_name != nullptr && "pointer can't be null");
 
-
     unsigned int write_cnt = 0;
     unsigned int   tmp_cnt = 0;
 
