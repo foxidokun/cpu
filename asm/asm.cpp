@@ -346,15 +346,14 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     int value = 0;
     char second_word[MAX_LABEL_LEN+1] = "";
 
-    if (strstr (line, "equ") != nullptr)
+    if (sscanf (line, "%s%s%d", label, second_word, &value) == 3)
     {
-        int arg = 0;
-        sscanf (line, "%s", label);
-        sscanf (strstr (line, "equ") + 3, "%d", &arg);
-        
-        hashmap_insert (code->name_table, label, MAX_LABEL_LEN+1,
-                        &arg, sizeof (int));
-        return true;
+        if (strcmp ("equ", second_word) == 0)
+        {
+            hashmap_insert (code->name_table, label, MAX_LABEL_LEN+1,
+                            &value, sizeof (int));
+            return true;
+        }
     }
 
     return false;
