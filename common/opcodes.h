@@ -143,4 +143,4 @@ CMD_DEF (call, 19, {
 CMD_DEF (ret, 20, {
     POP_ADDR (&OP1);
     JMP (OP1);
-}, 1)
+}, 0)
