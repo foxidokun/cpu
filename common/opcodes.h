@@ -60,8 +60,20 @@
         }                                   \
     }, 1)                                   \
 
+// -----------------------------------------
+
 CMD_DEF (halt, 0, { HLT (); }, 0)
+
+CMD_DEF (video, 23, VIDEO(), 0)
+
+CMD_DEF (dump, 21, {
+    DUMP ();
+}, 0)
+
+// -----------------------------------------
+
 CMD_DEF (push, 1, { OP1 = GET_ARG (); PUSH_DATA (&OP1); }, 1)
+
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();
     if (OPPTR == nullptr)
@@ -75,18 +87,27 @@ CMD_DEF (pop,  2, {
     }
 }, 1)
 
+// -----------------------------------------
+
 _CMD_DEF_ARTHM (add, 3, +, ;)
 _CMD_DEF_ARTHM (sub, 4, -, ;)
+_CMD_DEF_ARTHM (mul, 6, *, ;)
+
 _CMD_DEF_ARTHM (div, 5, /, {
     if (OP2 == 0) {
         log (log::ERR, "Zero division error");
         ZERODIV();
     }
 })
-_CMD_DEF_ARTHM (mul, 6, *, ;)
 
 _CMD_DEF_ONE_OP (inc, 7,  ++)
 _CMD_DEF_ONE_OP (dec, 8,  --)
+
+_CMD_DEF_ONE_OP (zxc, 18, -7 + )
+
+_CMD_DEF_ONE_OP (sqrt, 22, SQRT)
+
+// -----------------------------------------
 
 CMD_DEF (out, 9, {
     POP_DATA (&OP1);
@@ -97,6 +118,9 @@ CMD_DEF (inp, 10, {
     INP  (OP1);
     PUSH_DATA (&OP1);
 }, 0)
+
+
+// -----------------------------------------
 
 CMD_DEF (jmp, 11, {
     JMP (GET_ARG ());
@@ -109,7 +133,6 @@ _CMD_DEF_JMP_IF (jbe, 15, <=)
 _CMD_DEF_JMP_IF (je,  16, ==)
 _CMD_DEF_JMP_IF (jne, 17, !=)
 
-_CMD_DEF_ONE_OP (zxc, 18, -7 + )
 
 CMD_DEF (call, 19, {
     OP1 = GET_ARG ();
@@ -121,11 +144,3 @@ CMD_DEF (ret, 20, {
     POP_ADDR (&OP1);
     JMP (OP1);
 }, 1)
-
-CMD_DEF (dump, 21, {
-    DUMP ();
-}, 0)
-
-_CMD_DEF_ONE_OP (sqrt, 22, SQRT)
-
-CMD_DEF (video, 23, VIDEO(), 0)
