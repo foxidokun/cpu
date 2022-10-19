@@ -43,12 +43,21 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
 
     for (unsigned int i = 0; i < source->n_lines; ++i)
     {
-        if (source->lines[i].len <= 1 || strchr (source->lines[i].content, ';') != nullptr)
+        line = strchr (source->lines[i].content, ';');
+        if (line != nullptr)
+        {
+            *line = '\0';
+        }
+
+        line = source->lines[i].content;
+        while (isspace (*line)) line++;
+
+        if (strlen (line) <= 1)
         {
             continue;
         }
 
-        write_len = translate_command (mcode_ptr, source->lines[i].content, code);
+        write_len = translate_command (mcode_ptr, line, code);
         if (write_len == ERROR)
         {
             log (log::ERR, "Failed to parse command on line %d", i+1);
