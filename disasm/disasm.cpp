@@ -132,7 +132,7 @@ unsigned int write_arg (const opcode_t *instr, char *buf, const void *code, size
 
     if (instr->i) {
         sprintf (tmp_buf, "%d%n", *(const int *) code, &tmp_cnt);
-        assert (tmp_cnt > 0 && "Impossible %n return => bad type casting");
+        assert (tmp_cnt > 0 && "Impossible %n return => bad type cast");
         write_cnt = (unsigned int) tmp_cnt;
         code = (const char*) code +  sizeof (int);
         *code_shift         += sizeof (int);
