@@ -43,6 +43,10 @@ int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str,
 
 int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf);
 
+bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num);
+bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int* val);
+bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str);
+
 int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap *name_table);
 
 int write_binary (FILE *stream, const struct code_t *code);

@@ -225,56 +225,17 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     opcode->r       = false;
     opcode->i       = false;
     int arg         = 0;
-    int reg_num     = 0;
+    char reg_num    = 0;
     int arg_bin_len = 0;
-    size_t arg_len  = strlen (arg_str);
+    bool res        = false;
 
-    _SKIP_SPACE
-    if (arg_str[0] == '[')
-    {
-        if (arg_str[arg_len-1] != ']') return ERROR;
-        else 
-        {
-            opcode->m = true;
-            arg_str++;
-            arg_len -= 2;
-        }
-    }
+    res = translate_normal_arg_imm (opcode, arg_str, &arg);
+    if (res && arg == ERROR) return ERROR;
 
-    for (int i = 0; i < 3; ++i)
-    {
-        _SKIP_SPACE
-        if (isdigit (arg_str[0]) || arg_str[0] == '-')
-        {
-            opcode->i   = true;
-            int int_len = 0;
+    res = translate_normal_arg_reg (opcode, arg_str, &reg_num);
+    if (res && reg_num == ERROR) return ERROR;
 
-            sscanf (arg_str, "%d%n", &arg, &int_len);
-            if (int_len == 0) return ERROR;        
-            arg_str += int_len;
-            arg_len -= (size_t) int_len;
-        }
-        else if (arg_str[0] == 'r' && arg_str[2] == 'x')
-        {
-            opcode->r = true;
-            reg_num   = arg_str[1] - 'a';
-            arg_str  += 3;
-            arg_len  -= 3;
-
-            if (reg_num < 0 || reg_num > REG_CNT) return ERROR;
-        }
-        else if (arg_str[0] == '+' && i == 1)
-        {
-            arg_str++;
-            arg_len--;
-        }
-        else if (arg_str[0] != '\0' && arg_len != 0)
-        {
-            return ERROR;
-        }
-
-        _SKIP_SPACE
-    }
+    res = translate_normal_arg_mem (opcode, arg_str);
 
     if (opcode->i)
     {
@@ -290,10 +251,85 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
         arg_bin_len += (int) sizeof (unsigned char);
     }
 
+    if ( !(opcode->r || opcode->m || opcode->i) )
+    {
+        return ERROR;
+    }
+
     return arg_bin_len;
 }
 
 #undef _SKIP_SPACE
+
+bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num)
+{
+    assert (opcode  != nullptr && "pointer can't be null");
+    assert (arg_str != nullptr && "pointer can't be null");
+    assert (reg_num != nullptr && "pointer can't be null");
+
+    const char *chr_ptr = strchr (arg_str, 'x');
+
+    if (chr_ptr == nullptr)    return false;
+    if (chr_ptr - arg_str < 2) return false;
+    if (chr_ptr[-2] != 'r')    return false;
+    
+    *reg_num = chr_ptr[-1] - 'a';
+
+    if      (*reg_num < 0)       *reg_num = ERROR;
+    else if (*reg_num > REG_CNT) *reg_num = ERROR;
+
+    opcode->r = true;
+    return true;
+}
+
+bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int* val)
+{
+    assert (opcode  != nullptr && "pointer can't be null");
+    assert (arg_str != nullptr && "pointer can't be null");
+    assert (val     != nullptr && "pointer can't be null");
+
+    while (*arg_str != '\0' && !isdigit (*arg_str))
+    {
+        arg_str++;
+    }
+
+    if (*arg_str == '\0') return false;
+
+    if (sscanf (arg_str, "%d", val) != 1)
+    {
+        return false;
+    }
+    else
+    {
+        opcode->i = true;
+        return true;
+    }
+}
+
+bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str)
+{
+    assert (opcode  != nullptr && "pointer can't be null");
+    assert (arg_str != nullptr && "pointer can't be null");
+
+    while (isspace (*arg_str)) arg_str++;
+
+    if (*arg_str != '[')
+    {
+        return false;
+    }
+    else
+    {
+        if (strchr(arg_str, '\0') - strrchr (arg_str, ']') != 1)
+        {
+            return false;
+        }
+        else
+        {
+            opcode->m = true;
+            return true;
+        }
+    }
+}
 
 int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap *name_table)
 {
