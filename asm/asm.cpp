@@ -39,6 +39,7 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source)
 
     char *mcode_ptr = (char *) code->mcode;
     ssize_t write_len = 0;
+    char *line = nullptr;
 
     for (unsigned int i = 0; i < source->n_lines; ++i)
     {
@@ -312,7 +313,7 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
 
     while (isspace(line[0])) line++;
 
-    char label[MAX_LABEL_LEN+1];
+    char label[MAX_LABEL_LEN+1] = "";
     strncpy (label, line, MAX_LABEL_LEN);
 
     int ret = 0;
