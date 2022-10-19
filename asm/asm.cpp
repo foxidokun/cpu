@@ -331,7 +331,7 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     if (chr_ptr != nullptr)
     {
         *chr_ptr = '\0';
-        ret = hashmap_insert (code->name_table, label, chr_ptr - label + 1,
+        ret = hashmap_insert (code->name_table, label, (size_t) (chr_ptr - label) + 1,
                             &bin_pos, sizeof (int));
 
         if (code->name_table->used == code->name_table->allocated)
