@@ -165,7 +165,7 @@ int translate_command (void *const buf, const char *line, code_t *code)
             command_not_found = false;
     }
 
-    assert (buf_c - (char *) buf < INT_MAX && "Too long command => bad type casting");
+    assert (buf_c - (char *) buf < INT_MAX && "Too long command, I'm too stupid to translate it, sorry => bad type cast");
 
     if (command_not_found) return ERROR;
     else                   return (int)(buf_c - (char *) buf);
