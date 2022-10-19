@@ -327,23 +327,24 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
 
     int ret = 0;
 
-    for (unsigned int i = 0; i < MAX_LABEL_LEN; ++i)
+    char *chr_ptr = strchr (label, ':');
+    if (chr_ptr != nullptr)
     {
-        if (label[i] == ':')
+        *chr_ptr = '\0';
+        ret = hashmap_insert (code->name_table, label, chr_ptr - label + 1,
+                            &bin_pos, sizeof (int));
+
+        if (code->name_table->used == code->name_table->allocated)
         {
-            label[i] = '\0';
-            ret = hashmap_insert (code->name_table, label, i+1,
-                        &bin_pos, sizeof (int));
-
-            if (code->name_table->used == code->name_table->allocated)
-            {
-                code->name_table = hashmap_resize (code->name_table,
-                                                   code->name_table->allocated * 2);
-            }
-
-            return true;
+            code->name_table = hashmap_resize (code->name_table,
+                                               code->name_table->allocated * 2);
         }
+
+        return true;
     }
+
+    int value = 0;
+    char second_word[MAX_LABEL_LEN+1] = "";
 
     if (strstr (line, "equ") != nullptr)
     {
