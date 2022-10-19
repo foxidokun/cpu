@@ -188,7 +188,7 @@ int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str,
 
     if (req_arg)
     {
-        ret_code = translate_normal_arg(instr_ptr, asm_str, buf_c);
+        ret_code = translate_normal_arg (instr_ptr, asm_str, buf_c);
         if (ret_code == ERROR) {
             ret_code = translate_label(instr_ptr, asm_str, buf_c, code->name_table);
             if (ret_code == ERROR && code->n_pass != 0) return ERROR;
@@ -284,7 +284,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     }
     if (opcode->r)
     {
-        assert (reg_num <= CHAR_MAX && reg_num >= 0 && "Invalid type casting");
+        assert (reg_num <= CHAR_MAX && reg_num >= 0 && "Invalid type cast");
         *(unsigned char *) buf = (unsigned char) reg_num;
         buf = (char *) buf + sizeof (unsigned char);
         arg_bin_len += (int) sizeof (unsigned char);
