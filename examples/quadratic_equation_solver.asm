@@ -76,6 +76,9 @@ read_inp:
 ;// rax = -b/2a
     pop rax
 
+    push 2
+    out
+
     push rax
     push rdx
     sub
@@ -91,7 +94,10 @@ read_inp:
 zero_a:
     push rbx
     push 0
-    je bright_future
+    je zero_b
+
+    push 1
+    out
 
     push rcx
     push -1
@@ -100,6 +106,19 @@ zero_a:
     call divf
 
     call print
+    jmp bright_future
+
+zero_b:
+    push rcx
+    push 0
+    je inf_roots
+    push 0
+    out
+    jmp bright_future
+
+inf_roots:
+    push -1
+    out
     jmp bright_future
 
 zero_d:
@@ -112,6 +131,9 @@ zero_d:
     mul
 
     call divf
+
+    push 1
+    out
 
     call print
     jmp bright_future
