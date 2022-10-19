@@ -50,7 +50,7 @@ CPU_ERRORS execute (cpu_t *const cpu)
 
     const opcode_t *instruct = nullptr;
     int op1 = 0, op2 = 0;
-    int *op_ptr;
+    int *op_ptr = nullptr;
 
     for (cpu->in = 0; cpu->in < cpu->code_size;)
     {
