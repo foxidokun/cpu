@@ -205,16 +205,6 @@ int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str,
     return (int) (buf_c - (char *)buf);
 }
 
-#define _SKIP_SPACE                                 \
-{                                                   \
-    while (isspace(arg_str[0]) && arg_len > 0)      \
-    {                                               \
-        arg_str++;                                  \
-        arg_len--;                                  \
-    }                                               \
-                                                    \
-}
-
 int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf)
 {
     assert (opcode  != nullptr && "pointer can't be null");
@@ -258,8 +248,6 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
 
     return arg_bin_len;
 }
-
-#undef _SKIP_SPACE
 
 bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num)
 {
