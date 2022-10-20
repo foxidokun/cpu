@@ -238,7 +238,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
         arg_bin_len += (int) sizeof (unsigned char);
     }
 
-    if ( !(opcode->r || opcode->m || opcode->i) )
+    if ( !(opcode->r || opcode->i) )
     {
         return ERROR;
     }
