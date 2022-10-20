@@ -116,7 +116,7 @@ void free_code (code_t *code)
         instr_ptr->opcode = number;                                                     \
         command_not_found = false;                                                      \
                                                                                         \
-        ret_code = translate_arg (code, instr_ptr, line, buf_c, #name, req_arg);\
+        ret_code = translate_arg (code, instr_ptr, line, buf_c, #name, req_arg);        \
         if (ret_code == ERROR) return ERROR;                                            \
         else buf_c += ret_code;                                                         \
     } else
@@ -228,6 +228,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     if (opcode->i)
     {
         *(int *) buf = arg;
+
         buf = (char *) buf + sizeof (int);
         arg_bin_len += (int) sizeof (int);
     }
@@ -235,6 +236,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     {
         assert (reg_num <= CHAR_MAX && reg_num >= 0 && "Invalid type cast");
         *(unsigned char *) buf = (unsigned char) reg_num;
+
         buf = (char *) buf + sizeof (unsigned char);
         arg_bin_len += (int) sizeof (unsigned char);
     }

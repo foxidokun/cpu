@@ -46,7 +46,12 @@ case number:                                    \
 #define SYNTAX_ERROR() return CPU_ERRORS::SYNTAX
 
 #define _CLEAR_SCREEN printf ("\033[2J")
-#define _PAUSE        printf ("Press any key to continue\n"); scanf("%c", &op1);
+#define _PAUSE                                          \
+        _Pragma("GCC diagnostic push")                  \
+        _Pragma("GCC diagnostic ignored \"-Wformat\"")  \
+        printf ("Press any key to continue\n");         \
+        scanf("%c", &op1);                              \
+        _Pragma("GCC diagnostic pop")                               
 
 #define INP(arg) printf ("Stupid programmer decided to ask you for a number at runtime: \n"); scanf ("%i", &arg)
 #define OUT(arg) printf ("you really can't calculate %i without calc?\n", arg)
