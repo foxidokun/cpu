@@ -30,6 +30,7 @@
 // 21  dump       -- dump cpu internal data & pause
 // 22  sqrt       -- push (sqrt (a))
 // 23  video      -- render video output & pause
+// 24  sleep      -- sleep for a nanoseconds
 
 
 #define _CMD_DEF_ONE_OP(name, number, func) \
@@ -143,4 +144,12 @@ CMD_DEF (call, 19, {
 CMD_DEF (ret, 20, {
     POP_ADDR (&OP1);
     JMP (OP1);
+}, 0)
+
+//------------------------------------------- 
+
+CMD_DEF (sleep, 24, 
+{
+    POP_DATA (&OP1);
+    SLEEP (OP1);
 }, 0)

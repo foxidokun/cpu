@@ -2,6 +2,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <unistd.h>
 
 #include "../common/exec.h"
 #include "../common/common.h"

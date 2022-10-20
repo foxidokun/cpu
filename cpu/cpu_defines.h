@@ -56,7 +56,8 @@ case number:                                    \
 #define INP(arg) printf ("Stupid programmer decided to ask you for a number at runtime: \n"); scanf ("%i", &arg)
 #define OUT(arg) printf ("you really can't calculate %i without calc?\n", arg)
 #define DUMP()   _CLEAR_SCREEN; dump_cpu     (cpu); _PAUSE;
-#define VIDEO()  render_video (cpu); _PAUSE;
+#define VIDEO()  render_video (cpu);
+#define SLEEP(x) usleep ((unsigned) x * 1000)
 
 #define SQRT (int) sqrt
 
