@@ -215,12 +215,13 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     char reg_num    = 0;
     int arg_bin_len = 0;
     bool res        = false;
+    bool err        = false;
 
-    res = translate_normal_arg_imm (opcode, arg_str, &arg);
-    if (res && arg == ERROR) return ERROR;
+    res = translate_normal_arg_imm (opcode, arg_str, &arg, &err);
+    if (res && err) return ERROR;
 
-    res = translate_normal_arg_reg (opcode, arg_str, &reg_num);
-    if (res && reg_num == ERROR) return ERROR;
+    res = translate_normal_arg_reg (opcode, arg_str, &reg_num, &err);
+    if (res && err) return ERROR;
 
     res = translate_normal_arg_mem (opcode, arg_str);
 
@@ -246,14 +247,15 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     return arg_bin_len;
 }
 
-bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num)
+bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num, bool *err)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
     assert (reg_num != nullptr && "pointer can't be null");
+    assert (err     != nullptr && "pointer can't be null");
 
+    *err      = false;
     opcode->r = false;
-
     const char *chr_ptr = strchr (arg_str, 'x');
 
     if (chr_ptr == nullptr)    return false;
@@ -262,22 +264,23 @@ bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char
     
     *reg_num = chr_ptr[-1] - 'a';
 
-    if      (*reg_num < 0)       *reg_num = ERROR;
-    else if (*reg_num > REG_CNT) *reg_num = ERROR;
+    if      (*reg_num < 0)       *err = true;
+    else if (*reg_num > REG_CNT) *err = true;
+    else                         opcode->r = true;
 
-    opcode->r = true;
     return true;
 }
 
-bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int* val)
+bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int* val, bool *err)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
     assert (val     != nullptr && "pointer can't be null");
 
     opcode->i = false;
+    *err = false;
 
-    while (*arg_str != '\0' && !isdigit (*arg_str))
+    while (*arg_str != '\0' && !(isdigit (*arg_str) || *arg_str == '-' || *arg_str == '+') )
     {
         arg_str++;
     }
@@ -286,7 +289,8 @@ bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int*
 
     if (sscanf (arg_str, "%d", val) != 1)
     {
-        return false;
+        *err = true;
+        return true; // Immediate arg exists but i can't parse it
     }
     else
     {
