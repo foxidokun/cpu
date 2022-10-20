@@ -8,7 +8,7 @@
 #include "../stack/stack.h"
 
 // #define ALWAYS_DUMP
-#define VIDEO
+#define ENABLE_VIDEO
 
 typedef header_v1_t header_t;
 
@@ -33,6 +33,19 @@ struct cpu_t
     size_t last_ram_indx;
     SDL_Renderer *renderer;
     SDL_Window *window;
+};
+
+struct color_t
+{
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+};
+
+union int_color_wrapper_t
+{
+    int _arg_;
+    color_t color;
 };
 
 CPU_ERRORS run_binary (const void *binary, size_t binary_size);

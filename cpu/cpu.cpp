@@ -142,9 +142,10 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
     stack_ctor (&cpu->data_stk, sizeof (int), DATA_STACK_RESERVED_CAPACITY, int_printf);
     stack_ctor (&cpu->addr_stk, sizeof (int), ADDR_STACK_RESERVED_CAPACITY, int_printf);
 
-    #ifdef VIDEO
+    #ifdef ENABLE_VIDEO
         SDL_Init (SDL_INIT_VIDEO);
-        SDL_CreateWindowAndRenderer (VRAM_HEIGHT, VRAM_WIDTH, 0, &cpu->window, &cpu->renderer);
+        SDL_CreateWindowAndRenderer (VRAM_HEIGHT * RECT_SIZE, VRAM_WIDTH * RECT_SIZE, 0,
+                                    &cpu->window, &cpu->renderer);
         SDL_SetRenderDrawColor (cpu->renderer, 0, 0, 0, 255);
         SDL_RenderClear (cpu->renderer);
         SDL_RenderPresent (cpu->renderer);
@@ -167,7 +168,7 @@ CPU_ERRORS cpu_free (cpu_t *cpu)
         return CPU_ERRORS::INTERNAL_ERROR;
     }
 
-    #ifdef VIDEO
+    #ifdef ENABLE_VIDEO
         SDL_DestroyRenderer (cpu->renderer);
         SDL_DestroyWindow (cpu->window);
         SDL_Quit ();
