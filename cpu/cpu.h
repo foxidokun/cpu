@@ -1,11 +1,14 @@
 #ifndef CPU_H
 #define CPU_H
 
+#include <SDL2/SDL.h>
+
 #include "../common/exec.h"
 #include "../common/config.h"
 #include "../stack/stack.h"
 
 // #define ALWAYS_DUMP
+#define VIDEO
 
 typedef header_v1_t header_t;
 
@@ -28,6 +31,8 @@ struct cpu_t
     size_t code_size;
     size_t in;
     size_t last_ram_indx;
+    SDL_Renderer *renderer;
+    SDL_Window *window;
 };
 
 CPU_ERRORS run_binary (const void *binary, size_t binary_size);

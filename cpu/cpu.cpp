@@ -1,10 +1,11 @@
+#include "cpu.h"
+
 #include <assert.h>
 #include <math.h>
 
 #include "../common/exec.h"
 #include "../common/common.h"
 #include "../stack/log.h"
-#include "cpu.h"
 
 const int RAM_BYTES_BEFORE    = 4;
 const int RAM_BYTES_AFTER     = 6;
@@ -141,6 +142,14 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
     stack_ctor (&cpu->data_stk, sizeof (int), DATA_STACK_RESERVED_CAPACITY, int_printf);
     stack_ctor (&cpu->addr_stk, sizeof (int), ADDR_STACK_RESERVED_CAPACITY, int_printf);
 
+    #ifdef VIDEO
+        SDL_Init (SDL_INIT_VIDEO);
+        SDL_CreateWindowAndRenderer (VRAM_HEIGHT, VRAM_WIDTH, 0, &cpu->window, &cpu->renderer);
+        SDL_SetRenderDrawColor (cpu->renderer, 0, 0, 0, 255);
+        SDL_RenderClear (cpu->renderer);
+        SDL_RenderPresent (cpu->renderer);
+    #endif
+
     return CPU_ERRORS::OK;
 }
 
@@ -157,6 +166,12 @@ CPU_ERRORS cpu_free (cpu_t *cpu)
     {
         return CPU_ERRORS::INTERNAL_ERROR;
     }
+
+    #ifdef VIDEO
+        SDL_DestroyRenderer (cpu->renderer);
+        SDL_DestroyWindow (cpu->window);
+        SDL_Quit ();
+    #endif
 
     return CPU_ERRORS::OK;
 }

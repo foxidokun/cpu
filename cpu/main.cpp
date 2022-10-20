@@ -2,10 +2,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "cpu.h"
 #include "../common/common.h"
 #include "../stack/log.h"
 #include "../file/file.h"
-#include "cpu.h"
 
 int main (int argc, char *argv[])
 {
