@@ -144,7 +144,7 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
 
     #ifdef ENABLE_VIDEO
         SDL_Init (SDL_INIT_VIDEO);
-        SDL_CreateWindowAndRenderer (VRAM_HEIGHT * RECT_SIZE, VRAM_WIDTH * RECT_SIZE, 0,
+        SDL_CreateWindowAndRenderer (VRAM_WIDTH * RECT_SIZE, VRAM_HEIGHT * RECT_SIZE, 0,
                                     &cpu->window, &cpu->renderer);
         SDL_SetRenderDrawColor (cpu->renderer, 0, 0, 0, 255);
         SDL_RenderClear (cpu->renderer);
@@ -237,19 +237,31 @@ void render_video (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
 
-    int mem_cell = 0;
+    int_color_wrapper_t mem_cell = {};
+    SDL_Rect rect = {};
+    rect.h = RECT_SIZE;
+    rect.w = RECT_SIZE;
+
+    SDL_SetRenderDrawColor (cpu->renderer, 0, 0, 0, 255);
+    SDL_RenderClear (cpu->renderer);
 
     for (int y = 0; y < VRAM_HEIGHT; ++y)
     {
         for (int x = 0; x < VRAM_WIDTH; ++x)
         {
-            mem_cell = ((unsigned) cpu->ram[VRAM_WIDTH*y + x]) % 256;
+            mem_cell.arg = (unsigned) cpu->ram[VRAM_WIDTH*y + x];
 
-            printf ("\033[48;5;%dm" " " "\033[48;5;0m", mem_cell);
+            rect.x = x * RECT_SIZE;
+            rect.y = y * RECT_SIZE;
+
+            SDL_SetRenderDrawColor (cpu->renderer, mem_cell.color.r,
+                                                   mem_cell.color.g,
+                                                   mem_cell.color.b, 255);
+            SDL_RenderFillRect (cpu->renderer, &rect);
         }
-
-        putchar ('\n');
     }
+    
+    SDL_RenderPresent (cpu->renderer);
 }
 
 void int_printf (const void *elem, size_t elem_size, FILE *stream)

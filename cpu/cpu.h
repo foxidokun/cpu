@@ -44,7 +44,7 @@ struct color_t
 
 union int_color_wrapper_t
 {
-    int _arg_;
+    int arg;
     color_t color;
 };
 
