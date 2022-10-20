@@ -211,9 +211,6 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     assert (arg_str != nullptr && "pointer can't be null");
     assert (buf     != nullptr && "pointer can't be null");
 
-    opcode->m       = false;
-    opcode->r       = false;
-    opcode->i       = false;
     int arg         = 0;
     char reg_num    = 0;
     int arg_bin_len = 0;
@@ -255,6 +252,8 @@ bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char
     assert (arg_str != nullptr && "pointer can't be null");
     assert (reg_num != nullptr && "pointer can't be null");
 
+    opcode->r = false;
+
     const char *chr_ptr = strchr (arg_str, 'x');
 
     if (chr_ptr == nullptr)    return false;
@@ -275,6 +274,8 @@ bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int*
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
     assert (val     != nullptr && "pointer can't be null");
+
+    opcode->i = false;
 
     while (*arg_str != '\0' && !isdigit (*arg_str))
     {
@@ -298,6 +299,8 @@ bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
+
+    opcode->m = false;
 
     while (isspace (*arg_str)) arg_str++;
 
