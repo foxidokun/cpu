@@ -19,8 +19,6 @@
     }                                                                                   \
 }
 
-// Этот файл надо явнее связать с opcodes.h
-
 #define OP1         op1
 #define OP2         op2
 #define OPPTR       op_ptr

@@ -1,3 +1,5 @@
+#include "cpu_defines.h"
+
 #ifndef CMD_DEF
 #error "No CMD_DEF macros"
 #endif

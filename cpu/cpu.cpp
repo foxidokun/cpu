@@ -22,7 +22,6 @@ void int_printf (const void *elem, size_t elem_size, FILE *stream);
 #ifdef CLEANUP_DEFINES
     #undef CLEANUP_DEFINES
 #endif
-#include "cpu_defines.h"
 
 #define CMD_DEF(name, number, code, ...)        \
 case number:                                    \
@@ -62,11 +61,11 @@ CPU_ERRORS execute (cpu_t *const cpu)
     return CPU_ERRORS::OK;
 }
 
-#undef CMD_DEF
-
 #define CLEANUP_DEFINES
-#include "cpu_defines.h"
+#include "../common/cpu_defines.h"
 #undef CLEANUP_DEFINES
+
+#undef CMD_DEF
 
 // ---------------------------------------------------------------------------------------------
 
@@ -193,7 +192,7 @@ char *load_binary (FILE *file)
         return nullptr;
     }
 
-    BIN_ERROR res = verify_binary (binary, binary_size, BINARY_VERSION, HEADER_VERSION);
+    BIN_ERROR res = verify_binary (binary, (size_t) binary_size, BINARY_VERSION, HEADER_VERSION);
     if (res != BIN_ERROR::OK)
     {
         log (log::ERR, "Invalid binary, error: %s", bin_strerror (res));
@@ -281,7 +280,7 @@ void render_video (cpu_t *cpu)
     {
         for (int x = 0; x < VRAM_WIDTH; ++x)
         {
-            mem_cell.arg = (unsigned) cpu->ram[VRAM_WIDTH*y + x];
+            mem_cell.arg = cpu->ram[VRAM_WIDTH*y + x];
 
             rect.x = x * RECT_SIZE;
             rect.y = y * RECT_SIZE;
