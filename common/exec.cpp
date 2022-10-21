@@ -24,7 +24,7 @@ BIN_ERROR verify_binary (const void *bin, size_t bin_size,
             return BIN_ERROR::BAD_SIZE;
         }
 
-        if (djb2 (header+1, header->code_size) != header->hash)
+        if (djb2_hash (header+1, header->code_size) != header->hash)
         {
             return BIN_ERROR::BAD_HASH;
         }

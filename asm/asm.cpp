@@ -25,7 +25,7 @@ ASM_ERRORS compile (struct code_t *code, const text *source)
         code->n_pass++;
     }
 
-    code->header.hash = djb2 (code->mcode, code->header.code_size);
+    code->header.hash = djb2_hash (code->mcode, code->header.code_size);
 
     return ASM_ERRORS::OK;
 }
