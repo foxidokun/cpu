@@ -5,7 +5,6 @@
 #include "cpu.h"
 #include "../common/common.h"
 #include "../stack/log.h"
-#include "../file/file.h"
 
 int main (int argc, char *argv[])
 {
@@ -20,19 +19,18 @@ int main (int argc, char *argv[])
     FILE *in_file  = fopen (argv[1], "r" );
     if (in_file  == nullptr) { log(log::ERR, "Failed to open file '%s'\n", argv[1]); return ERROR; }
 
-    void *binary = read_file (in_file);
-    ssize_t binary_size = file_size (in_file);
-    if (binary_size == -1) { log (log::ERR, "Failed to get binary file size"); }
-    
+    char *binary = load_binary (in_file);
     fclose (in_file);
 
-    CPU_ERRORS res = run_binary (binary, (size_t) binary_size);
-    if (res != CPU_ERRORS::OK)
+    cpu_t cpu = {};
+    cpu_ctor (&cpu, binary);
+
+    CPU_ERRORS exec_res = execute (&cpu);
+    if (exec_res != CPU_ERRORS::OK)
     {
-        log (log::ERR, "CPU exited with error %d", res);
-        free (binary);
-        return ERROR;
+        log (log::ERR, "Failed tp execute with error code %d", exec_res);
     }
 
     free (binary);
+    cpu_dtor (&cpu);
 }

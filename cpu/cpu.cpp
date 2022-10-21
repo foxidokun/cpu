@@ -7,6 +7,7 @@
 #include "../common/exec.h"
 #include "../common/common.h"
 #include "../stack/log.h"
+#include "../file/file.h"
 
 const int RAM_BYTES_BEFORE    = 4;
 const int RAM_BYTES_AFTER     = 6;
@@ -16,35 +17,17 @@ const int ADDR_STACK_RESERVED_CAPACITY  = 4;
 static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name);
 void int_printf (const void *elem, size_t elem_size, FILE *stream);
 
-
-CPU_ERRORS run_binary (const void *binary, size_t binary_size)
-{
-    assert (binary != nullptr && "pointer can't be null");
-
-    BIN_ERROR res = verify_binary (binary, binary_size, BINARY_VERSION, HEADER_VERSION);
-    if (res != BIN_ERROR::OK)
-    {
-        log (log::ERR, "Invalid binary, error: %s", bin_strerror (res));
-        return CPU_ERRORS::SYNTAX;
-    }
-
-    binary = (const char *)binary + sizeof (pre_header_t) + sizeof (header_t);
-    size_t code_size  = ((const header_t *)binary)[-1].code_size;
-
-    cpu_t *cpu = (cpu_t *) calloc (1, sizeof (cpu_t));
-    if (cpu == nullptr) { return CPU_ERRORS::NOMEM; }
-    cpu_init (cpu, binary, code_size);
-
-    CPU_ERRORS exec_res = execute (cpu);
-
-    free (cpu);
-    return exec_res;
-}
-
 #ifdef CLEANUP_DEFINES
     #undef CLEANUP_DEFINES
 #endif
 #include "cpu_defines.h"
+
+#define CMD_DEF(name, number, code, ...)        \
+case number:                                    \
+    log (log::DBG, "Decoding opcode %2d (%*s)", \
+        number, MAX_OPCODE_LEN, #name);         \
+    {code};                                     \
+    break;
 
 CPU_ERRORS execute (cpu_t *const cpu)
 {
@@ -76,6 +59,8 @@ CPU_ERRORS execute (cpu_t *const cpu)
     log (log::WRN, "No halt opcode in binary");
     return CPU_ERRORS::OK;
 }
+
+#undef CMD_DEF
 
 #define CLEANUP_DEFINES
 #include "cpu_defines.h"
@@ -132,14 +117,18 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
     return arg_ptr;
 }
 
-CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
+CPU_ERRORS cpu_ctor (cpu_t *cpu, const void* binary)
 {
-    assert (cpu  != nullptr && "pointer can't be null");
-    assert (code != nullptr && "pointer can't be null");
+    assert (cpu    != nullptr && "pointer can't be null");
+    assert (binary != nullptr && "pointer can't be null");
 
-    cpu->code      = (const char *) code;
+    binary = (const char *)binary + sizeof (pre_header_t) + sizeof (header_t);
+    size_t code_size  = ((const header_t *)binary)[-1].code_size;
+
+    cpu->code      = (const char *) binary;
     cpu->code_size = code_size;
     cpu->in        = 0;
+    cpu->ram       = (int *) calloc (TOTAL_RAM_SIZE, sizeof (int));
     stack_ctor (&cpu->data_stk, sizeof (int), DATA_STACK_RESERVED_CAPACITY, int_printf);
     stack_ctor (&cpu->addr_stk, sizeof (int), ADDR_STACK_RESERVED_CAPACITY, int_printf);
 
@@ -155,7 +144,7 @@ CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size)
     return CPU_ERRORS::OK;
 }
 
-CPU_ERRORS cpu_free (cpu_t *cpu)
+CPU_ERRORS cpu_dtor (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
 
@@ -164,7 +153,7 @@ CPU_ERRORS cpu_free (cpu_t *cpu)
         return CPU_ERRORS::INTERNAL_ERROR;
     }
     
-    if (stack_dtor_unwrap (&cpu->addr_stk, "data_stk") != CPU_ERRORS::OK)
+    if (stack_dtor_unwrap (&cpu->data_stk, "data_stk") != CPU_ERRORS::OK)
     {
         return CPU_ERRORS::INTERNAL_ERROR;
     }
@@ -175,7 +164,31 @@ CPU_ERRORS cpu_free (cpu_t *cpu)
         SDL_Quit ();
     #endif
 
+    free (cpu->ram);
+
     return CPU_ERRORS::OK;
+}
+
+char *load_binary (FILE *file)
+{
+    assert (file != nullptr && "pointer can'be null");
+
+    char *binary = read_file (file);
+    ssize_t binary_size = file_size (file);
+    if (binary_size == -1)
+    {
+        log (log::ERR, "Failed to get binary file size");
+        return nullptr;
+    }
+
+    BIN_ERROR res = verify_binary (binary, binary_size, BINARY_VERSION, HEADER_VERSION);
+    if (res != BIN_ERROR::OK)
+    {
+        log (log::ERR, "Invalid binary, error: %s", bin_strerror (res));
+        return nullptr;
+    }
+
+    return binary;
 }
 
 static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name)

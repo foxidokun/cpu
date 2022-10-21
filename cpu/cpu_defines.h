@@ -19,12 +19,7 @@
     }                                                                                   \
 }
 
-#define CMD_DEF(name, number, code, ...)        \
-case number:                                    \
-    log (log::DBG, "Decoding opcode %2d (%*s)", \
-        number, MAX_OPCODE_LEN, #name);         \
-    {code};                                     \
-    break;
+// Этот файл надо явнее связать с opcodes.h
 
 #define OP1         op1
 #define OP2         op2

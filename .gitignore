@@ -4,3 +4,9 @@
 obj
 bin
 .idea/
+video_prep
+
+examples/billy.asm
+examples/poltorashka.asm
+examples/river.asm
+examples/test_video.asm

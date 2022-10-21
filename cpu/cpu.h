@@ -27,7 +27,7 @@ struct cpu_t
     stack_t data_stk;
     stack_t addr_stk;
     int regs[REG_CNT];
-    int ram[TOTAL_RAM_SIZE];
+    int *ram;
     size_t code_size;
     size_t in;
     size_t last_ram_indx;
@@ -48,13 +48,13 @@ union int_color_wrapper_t
     color_t color;
 };
 
-CPU_ERRORS run_binary (const void *binary, size_t binary_size);
+char *load_binary (FILE *file);
 
 CPU_ERRORS execute (cpu_t *const cpu);
 
-CPU_ERRORS cpu_free (cpu_t *cpu);
+CPU_ERRORS cpu_dtor (cpu_t *cpu);
 
-CPU_ERRORS cpu_init (cpu_t *cpu, const void* code, size_t code_size);
+CPU_ERRORS cpu_ctor (cpu_t *cpu, const void* binary);
 
 void dump_cpu (cpu_t *cpu);
 void render_video (cpu_t *cpu);
