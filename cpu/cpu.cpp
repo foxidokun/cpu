@@ -17,6 +17,8 @@ const int ADDR_STACK_RESERVED_CAPACITY  = 4;
 static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name);
 void int_printf (const void *elem, size_t elem_size, FILE *stream);
 
+// ---------------------------------------------------------------------------------------------
+
 #ifdef CLEANUP_DEFINES
     #undef CLEANUP_DEFINES
 #endif
@@ -66,6 +68,8 @@ CPU_ERRORS execute (cpu_t *const cpu)
 #include "cpu_defines.h"
 #undef CLEANUP_DEFINES
 
+// ---------------------------------------------------------------------------------------------
+
 int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
 {
     assert (cpu      != nullptr && "pointer can't be null");
@@ -92,6 +96,8 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
     return arg;
 }
 
+// ---------------------------------------------------------------------------------------------
+
 int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
 {
     assert (cpu      != nullptr && "pointer can't be null");
@@ -116,6 +122,8 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
 
     return arg_ptr;
 }
+
+// ---------------------------------------------------------------------------------------------
 
 CPU_ERRORS cpu_ctor (cpu_t *cpu, const void* binary)
 {
@@ -144,6 +152,8 @@ CPU_ERRORS cpu_ctor (cpu_t *cpu, const void* binary)
     return CPU_ERRORS::OK;
 }
 
+// ---------------------------------------------------------------------------------------------
+
 CPU_ERRORS cpu_dtor (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
@@ -169,6 +179,8 @@ CPU_ERRORS cpu_dtor (cpu_t *cpu)
     return CPU_ERRORS::OK;
 }
 
+// ---------------------------------------------------------------------------------------------
+
 char *load_binary (FILE *file)
 {
     assert (file != nullptr && "pointer can'be null");
@@ -191,6 +203,8 @@ char *load_binary (FILE *file)
     return binary;
 }
 
+// ---------------------------------------------------------------------------------------------
+
 static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name)
 {
     err_flags dtor_res = stack_dtor (stk);
@@ -203,6 +217,8 @@ static CPU_ERRORS stack_dtor_unwrap (stack_t *stk, const char *const stk_name)
 
     return CPU_ERRORS::OK;
 }
+
+// ---------------------------------------------------------------------------------------------
 
 void dump_cpu (cpu_t *cpu)
 {
@@ -247,6 +263,8 @@ void dump_cpu (cpu_t *cpu)
     stack_dump(&cpu->addr_stk, log_stream);
 }
 
+// ---------------------------------------------------------------------------------------------
+
 void render_video (cpu_t *cpu)
 {
     assert (cpu != nullptr && "pointer can't be null");
@@ -277,6 +295,8 @@ void render_video (cpu_t *cpu)
     
     SDL_RenderPresent (cpu->renderer);
 }
+
+// ---------------------------------------------------------------------------------------------
 
 void int_printf (const void *elem, size_t elem_size, FILE *stream)
 {
