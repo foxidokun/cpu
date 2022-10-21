@@ -157,14 +157,6 @@ int translate_command (void *const buf, const char *line, code_t *code)
     // End of magic section                                                  //
     //***********************************************************************//
 
-    // Not command => label
-
-    if (command_not_found)
-    {
-        if (try_to_parse_label (code, line - cmd_len, (int) (buf_c - (char *) code->mcode)))
-            command_not_found = false;
-    }
-
     assert (buf_c - (char *) buf < INT_MAX && "Too long command, I'm too stupid to translate it, sorry => bad type cast");
 
     if (command_not_found) return ERROR;
