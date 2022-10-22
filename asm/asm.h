@@ -38,16 +38,16 @@ ASM_ERRORS one_pass_compile (struct code_t *code, const text *source);
 
 int translate_command (void *const buf, const char *line, code_t *code);
 
-int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
-                           const char *const name, const bool req_arg);
+int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, char *const buf,
+                           const char *const name);
 
 int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf);
 
-bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str,
-                                        char* reg_num, bool *err);
-bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str,
-                                        int* val, bool *err);
-bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str);
+void translate_normal_arg_reg (opcode_t *const opcode, char *arg_str, char *reg_num);
+
+void translate_normal_arg_imm (opcode_t *const opcode, char *arg_str, int* val);
+
+void translate_normal_arg_mem (opcode_t *const opcode, char *arg_str);
 
 int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap *name_table);
 

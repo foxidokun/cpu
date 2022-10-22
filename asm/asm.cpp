@@ -116,7 +116,8 @@ void free_code (code_t *code)
         instr_ptr->opcode = number;                                                     \
         command_not_found = false;                                                      \
                                                                                         \
-        ret_code = translate_arg (code, instr_ptr, line, buf_c, #name, req_arg);        \
+        if (req_arg)                                                                    \
+            ret_code = translate_arg (code, instr_ptr, line, buf_c, #name);             \
         if (ret_code == ERROR) return ERROR;                                            \
         else buf_c += ret_code;                                                         \
     } else
@@ -166,71 +167,74 @@ int translate_command (void *const buf, const char *line, code_t *code)
 #undef _IS_OPCODE
 #undef CMD_DEF
 
-int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, void *const buf,
-                            const char *const name, const bool req_arg)
+int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str, char *const code_buf_beg,
+                            const char *const name)
 {
-    assert (code      != nullptr && "pointer can't be null");
-    assert (instr_ptr != nullptr && "pointer can't be null");
-    assert (asm_str   != nullptr && "pointer can't be null");
-    assert (buf       != nullptr && "pointer can't be null");
-    assert (name      != nullptr && "pointer can't be null");
+    assert (code          != nullptr && "pointer can't be null");
+    assert (instr_ptr     != nullptr && "pointer can't be null");
+    assert (asm_str       != nullptr && "pointer can't be null");
+    assert (code_buf_beg  != nullptr && "pointer can't be null");
+    assert (name          != nullptr && "pointer can't be null");
 
-    char *buf_c  = (char *) buf + sizeof (opcode_t);
+    char *code_buf = code_buf_beg + sizeof (opcode_t);
     int ret_code = 0;
 
-    if (req_arg)
-    {
-        ret_code = translate_normal_arg (instr_ptr, asm_str, buf_c);
-        if (ret_code == ERROR) {
-            ret_code = translate_label(instr_ptr, asm_str, buf_c, code->name_table);
-            if (ret_code == ERROR && code->n_pass != 0) return ERROR;
+    ret_code = translate_normal_arg (instr_ptr, asm_str, code_buf);
+    if (ret_code == ERROR) {
+        ret_code = translate_label(instr_ptr, asm_str, code_buf, code->name_table);
+        if (ret_code == ERROR && code->n_pass != 0) return ERROR;
 
-            buf_c += sizeof(int);
-        } else if (strcmp (name, "pop") == 0 && instr_ptr->i && !(instr_ptr->m || instr_ptr->r)) {
-            return ERROR;
-        } else {
-            buf_c += ret_code;
-        }
+        code_buf += sizeof(int);
+    } else {
+        code_buf += ret_code;
     }
 
-    assert (buf_c - (char *)buf < INT_MAX && "Too long bytecode for this opcode");
-    return (int) (buf_c - (char *)buf);
+    assert (code_buf - code_buf_beg < INT_MAX && "Too long bytecode for this opcode");
+    return (int) (code_buf - code_buf_beg);
 }
 
-int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf)
-{
-    assert (opcode  != nullptr && "pointer can't be null");
-    assert (arg_str != nullptr && "pointer can't be null");
-    assert (buf     != nullptr && "pointer can't be null");
+// ---------------------------------------------------------------------------------------------------------------------
 
+#define EMIT_DATA(data, type)                       \
+{                                                   \
+    *(type *) code_buf = (type) arg;                \
+                                                    \
+    code_buf = (char *) code_buf + sizeof (type);   \
+    arg_bin_len += (int) sizeof (type);             \
+}
+
+int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *code_buf)
+{
+    assert (opcode   != nullptr && "pointer can't be null");
+    assert (arg_str  != nullptr && "pointer can't be null");
+    assert (code_buf != nullptr && "pointer can't be null");
+
+    char arg_copy[MAX_ASM_LINE_LEN] = "";
+    strcpy (arg_copy, arg_str);
+
+    int arg_bin_len = 0;
     int arg         = 0;
     char reg_num    = 0;
-    int arg_bin_len = 0;
-    bool res        = false;
-    bool err        = false;
 
-    res = translate_normal_arg_imm (opcode, arg_str, &arg, &err);
-    if (res && err) return ERROR;
+    translate_normal_arg_mem (opcode, arg_copy);
+    translate_normal_arg_reg (opcode, arg_copy, &reg_num);
+    translate_normal_arg_imm (opcode, arg_copy, &arg);
 
-    res = translate_normal_arg_reg (opcode, arg_str, &reg_num, &err);
-    if (res && err) return ERROR;
-
-    res = translate_normal_arg_mem (opcode, arg_str);
+    for (int i = 0; arg_copy[i] != '\0'; ++i)
+    {
+        if (!isspace(*arg_copy))
+        {
+            return ERROR;
+        }        
+    }
 
     if (opcode->i)
     {
-        *(int *) buf = arg;
-
-        buf = (char *) buf + sizeof (int);
-        arg_bin_len += (int) sizeof (int);
+        EMIT_DATA (arg, int);
     }
     if (opcode->r)
     {
-        assert (reg_num <= CHAR_MAX && reg_num >= 0 && "Invalid type cast");
-        *(unsigned char *) buf = (unsigned char) reg_num;
-
-        buf = (char *) buf + sizeof (unsigned char);
-        arg_bin_len += (int) sizeof (unsigned char);
+        EMIT_DATA (reg_num, unsigned char);
     }
 
     if ( !(opcode->r || opcode->i) )
@@ -241,59 +245,67 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *buf
     return arg_bin_len;
 }
 
-bool translate_normal_arg_reg (opcode_t *const opcode, const char *arg_str, char* reg_num, bool *err)
+#undef EMIT_DATA
+
+// ---------------------------------------------------------------------------------------------------------------------
+
+void translate_normal_arg_reg (opcode_t *const opcode, char *arg_str, char *reg_num)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
     assert (reg_num != nullptr && "pointer can't be null");
-    assert (err     != nullptr && "pointer can't be null");
 
-    *err      = false;
     opcode->r = false;
-    const char *chr_ptr = strchr (arg_str, 'x');
+    char *chr_ptr = strchr (arg_str, 'r');
 
-    if (chr_ptr == nullptr)    return false;
-    if (chr_ptr - arg_str < 2) return false;
-    if (chr_ptr[-2] != 'r')    return false;
+    if (chr_ptr == nullptr)                   return;
+    if (strchr (arg_str, '\0') - chr_ptr < 2) return;
+    if (chr_ptr[2] != 'x')                    return;
     
-    *reg_num = chr_ptr[-1] - 'a';
+    *reg_num = chr_ptr[1] - 'a';
 
-    if      (*reg_num < 0)       *err = true;
-    else if (*reg_num > REG_CNT) *err = true;
-    else                         opcode->r = true;
+    if (*reg_num < 0 || *reg_num >= REG_CNT)
+    {
+        return;
+    }
 
-    return true;
+    opcode->r = true;
+    chr_ptr[0] = ' ';
+    chr_ptr[1] = ' ';
+    chr_ptr[2] = ' ';
 }
 
-bool translate_normal_arg_imm (opcode_t *const opcode, const char *arg_str, int* val, bool *err)
+void translate_normal_arg_imm (opcode_t *const opcode, char *arg_str, int* val)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
     assert (val     != nullptr && "pointer can't be null");
 
     opcode->i = false;
-    *err = false;
 
-    while (*arg_str != '\0' && !(isdigit (*arg_str) || *arg_str == '-' || *arg_str == '+') )
-    {
-        arg_str++;
-    }
-
-    if (*arg_str == '\0') return false;
+    while (isspace (*arg_str)) arg_str++;
 
     if (sscanf (arg_str, "%d", val) != 1)
     {
-        *err = true;
-        return true; // Immediate arg exists but i can't parse it
+        return;
     }
-    else
+
+    if (*arg_str == '+' || *arg_str == '-')
     {
-        opcode->i = true;
-        return true;
+        *arg_str = ' ';
+        arg_str++;
     }
+
+    while (isdigit (*arg_str))
+    {
+        *arg_str = ' ';
+        arg_str++;
+    }
+
+    opcode->i = true;
 }
 
-bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str)
+void translate_normal_arg_mem (opcode_t *const opcode, char *arg_str)
 {
     assert (opcode  != nullptr && "pointer can't be null");
     assert (arg_str != nullptr && "pointer can't be null");
@@ -304,19 +316,21 @@ bool translate_normal_arg_mem (opcode_t *const opcode, const char *arg_str)
 
     if (*arg_str != '[')
     {
-        return false;
+        return;
     }
-    else
+
+    char *closing_bracket = strrchr (arg_str, ']');
+    
+    if (closing_bracket == nullptr)
     {
-        if (strchr(arg_str, '\0') - strrchr (arg_str, ']') != 1)
-        {
-            return false;
-        }
-        else
-        {
-            opcode->m = true;
-            return true;
-        }
+        return;
+    }
+
+    if (strchr(arg_str, '\0') -  closing_bracket == 1)
+    {
+        *arg_str         = ' ';
+        *closing_bracket = ' ';
+        opcode->m = true;
     }
 }
 
@@ -356,6 +370,7 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     if (chr_ptr != nullptr)
     {
         *chr_ptr = '\0';
+        //wrap
         ret = hashmap_insert (code->name_table, label, (size_t) (chr_ptr - label) + 1,
                             &bin_pos, sizeof (int));
 
@@ -369,11 +384,11 @@ bool try_to_parse_label (code_t *code, const char *line, int bin_pos)
     }
 
     int value = 0;
-    char second_word[MAX_LABEL_LEN+1] = "";
+    char second_token[MAX_LABEL_LEN+1] = "";
 
-    if (sscanf (line, "%s%s%d", label, second_word, &value) == 3)
+    if (sscanf (line, "%s%s%d", label, second_token, &value) == 3)
     {
-        if (strcmp ("equ", second_word) == 0)
+        if (strcmp ("equ", second_token) == 0)
         {
             hashmap_insert (code->name_table, label, MAX_LABEL_LEN+1,
                             &value, sizeof (int));
