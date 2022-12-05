@@ -8,7 +8,7 @@
 #include "../stack/stack.h"
 
 // #define ALWAYS_DUMP
-#define ENABLE_VIDEO
+// #define ENABLE_VIDEO
 
 typedef header_v1_t header_t;
 

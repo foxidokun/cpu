@@ -222,7 +222,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *cod
 
     for (int i = 0; arg_copy[i] != '\0'; ++i)
     {
-        if (!isspace(*arg_copy))
+        if (!isspace(arg_copy[i]))
         {
             return ERROR;
         }        
@@ -326,12 +326,9 @@ void translate_normal_arg_mem (opcode_t *const opcode, char *arg_str)
         return;
     }
 
-    if (strchr(arg_str, '\0') -  closing_bracket == 1)
-    {
-        *arg_str         = ' ';
-        *closing_bracket = ' ';
-        opcode->m = true;
-    }
+    *arg_str         = ' ';
+    *closing_bracket = ' ';
+    opcode->m = true;
 }
 
 int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap *name_table)
