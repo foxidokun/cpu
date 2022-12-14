@@ -87,7 +87,9 @@ int hashmap_insert (hashmap *map, const void *key, size_t key_size, const void *
     size_t id = map->hash (key, key_size) % map->allocated;
 
     // ID already in use with different key
-    if (check_bit (map->flags, id) && map->comp (key, (char *) map->keys + id*map->max_key_size))
+    bool not_same = (bool) map->comp (key, (char *) map->keys + id*map->max_key_size);
+
+    if (check_bit (map->flags, id) && not_same)
     {
         ssize_t id_tmp = bit_find_value (map->flags, 0, id);
         assert (id_tmp != ERROR && "Used < allocated, but all cells are occupied");
@@ -96,10 +98,30 @@ int hashmap_insert (hashmap *map, const void *key, size_t key_size, const void *
     }
 
     set_bit_true (map->flags, id);
-    map->used++;
 
-    memcpy ((char *) map->keys   + id*map->max_key_size,   key, key_size);
-    memcpy ((char *) map->values + id*map->max_val_size, value, val_size);
+    if (not_same)
+    {
+        map->used++;
+
+        memcpy ((char *) map->keys   + id*map->max_key_size,   key, key_size);
+        memcpy ((char *) map->values + id*map->max_val_size, value, val_size);
+    }
+
+    int debug = 0;
+    for (size_t i = 0; i < map->allocated; ++i)
+    {
+        if (check_bit (map->flags, i))
+        {
+            debug++;
+        }
+    }
+
+    if (debug != map->used)
+    {
+        log (log::ERR, "real: %zu official: %zu", debug, map->used);
+        assert (0);
+    }
+    assert (debug == map->used);
 
     return 0;
 }
