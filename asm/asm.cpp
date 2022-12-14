@@ -197,7 +197,7 @@ int translate_arg (code_t *code, opcode_t *const instr_ptr, const char* asm_str,
 
 #define EMIT_DATA(data, type)                       \
 {                                                   \
-    *(type *) code_buf = (type) arg;                \
+    *(type *) code_buf = (type) data;               \
                                                     \
     code_buf = (char *) code_buf + sizeof (type);   \
     arg_bin_len += (int) sizeof (type);             \
@@ -219,6 +219,7 @@ int translate_normal_arg (opcode_t *const opcode, const char *arg_str, void *cod
     translate_normal_arg_mem (opcode, arg_copy);
     translate_normal_arg_reg (opcode, arg_copy, &reg_num);
     translate_normal_arg_imm (opcode, arg_copy, &arg);
+
 
     for (int i = 0; arg_copy[i] != '\0'; ++i)
     {
