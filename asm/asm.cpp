@@ -342,10 +342,13 @@ int translate_label (opcode_t *instr, const char *line, void *const buf, hashmap
     instr->r = false;
     instr->i = true;
 
+    char label_name[MAX_LABEL_LEN] = "";
+    sscanf (line, "%s", label_name);
+
     while (isspace(line[0])) line++;
 
     unsigned int *buf_ui  = (unsigned int *) buf;
-    unsigned int *lbl_val = (unsigned int *) hashmap_get (name_table, line);
+    unsigned int *lbl_val = (unsigned int *) hashmap_get (name_table, label_name);
 
     if (lbl_val == nullptr) { *buf_ui = BAD_JMP_ADDR; return ERROR;                 }
     else                    { *buf_ui = *lbl_val;     return sizeof (unsigned int); }
