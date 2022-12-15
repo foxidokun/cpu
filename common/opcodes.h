@@ -58,7 +58,7 @@
         POP_DATA (&OP2);                    \
         POP_DATA (&OP1);                    \
         OP1 = (OP1 cond OP2);               \
-        OP2 = GET_ARG ();                   \
+        OP2 = GET_ARG () / PRECISION;       \
         if (OP1)                            \
         {                                   \
             JMP (OP2);                      \
@@ -77,7 +77,7 @@ CMD_DEF (dump, 21, {
 
 // -----------------------------------------
 
-CMD_DEF (push, 1, { OP1 = GET_ARG (); PUSH_DATA (&OP1); }, 1)
+CMD_DEF (push, 1, { OP1 = GET_ARG (); log(log::ERR, "About to push %d", OP1); PUSH_DATA (&OP1); }, 1)
 
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();
@@ -131,7 +131,7 @@ CMD_DEF (inp, 10, {
 // -----------------------------------------
 
 CMD_DEF (jmp, 11, {
-    JMP (GET_ARG ());
+    JMP (GET_ARG () / PRECISION);
 }, 1)
 
 _CMD_DEF_JMP_IF (ja,  12, > )
@@ -143,7 +143,7 @@ _CMD_DEF_JMP_IF (jne, 17, !=)
 
 
 CMD_DEF (call, 19, {
-    OP1 = GET_ARG ();
+    OP1 = GET_ARG () / PRECISION;
     PUSH_ADDR (&CURRENT_POS);
     JMP (OP1);
 }, 1)
