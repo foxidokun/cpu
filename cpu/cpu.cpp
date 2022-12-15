@@ -108,7 +108,7 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
     if (instruct -> m)
     {
         instruct_copy.m = false;
-        arg_ptr = &cpu->ram[extract_arg (cpu, &instruct_copy) / PRECISION];
+        arg_ptr = &cpu->ram[extract_arg (cpu, &instruct_copy)];
         instruct_copy.m = true;
     }
     else
