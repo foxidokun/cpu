@@ -107,22 +107,6 @@ int hashmap_insert (hashmap *map, const void *key, size_t key_size, const void *
         memcpy ((char *) map->values + id*map->max_val_size, value, val_size);
     }
 
-    int debug = 0;
-    for (size_t i = 0; i < map->allocated; ++i)
-    {
-        if (check_bit (map->flags, i))
-        {
-            debug++;
-        }
-    }
-
-    if (debug != map->used)
-    {
-        log (log::ERR, "real: %zu official: %zu", debug, map->used);
-        assert (0);
-    }
-    assert (debug == map->used);
-
     return 0;
 }
 
