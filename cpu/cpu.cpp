@@ -78,7 +78,7 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
 
     if (instruct->i)
     {
-        arg += *(const int *) (cpu->code + cpu->in);
+        arg += *(const int *) (cpu->code + cpu->in) * PRECISION;
         cpu->in += sizeof (int);
     }
     if (instruct->r)
@@ -89,7 +89,7 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
     if (instruct->m)
     {
         cpu->last_ram_indx = (size_t) arg;
-        arg = cpu->ram[arg];
+        arg = cpu->ram[arg / PRECISION];
     }
 
     return arg;
@@ -108,7 +108,7 @@ int *extract_arg_pop (cpu_t *cpu, const opcode_t *const instruct)
     if (instruct -> m)
     {
         instruct_copy.m = false;
-        arg_ptr = &cpu->ram[extract_arg (cpu, &instruct_copy)];
+        arg_ptr = &cpu->ram[extract_arg (cpu, &instruct_copy) / PRECISION];
         instruct_copy.m = true;
     }
     else

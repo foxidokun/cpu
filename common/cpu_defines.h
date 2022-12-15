@@ -32,7 +32,7 @@
 #define GET_ARG()     extract_arg     (cpu, instruct)
 #define GET_ARG_POP() extract_arg_pop (cpu, instruct)
 
-#define JMP(arg) cpu->in = (unsigned int) arg
+#define JMP(arg) cpu->in = (unsigned int) arg / PRECISION
 
 #define ZERODIV()      return CPU_ERRORS::ZERO_DIV
 #define HLT()          return CPU_ERRORS::OK
@@ -47,7 +47,7 @@
         _Pragma("GCC diagnostic pop")                               
 
 #define INP(arg) printf ("INPUT: \n"); scanf ("%i", &arg)
-#define OUT(arg) printf ("OUTPUT: %i.%02i\n", arg / 100, arg % 100)
+#define OUT(arg) printf ("OUTPUT: %i.%02i\n", arg / PRECISION, arg % PRECISION)
 #define DUMP()   _CLEAR_SCREEN; dump_cpu     (cpu); _PAUSE;
 #define VIDEO()  render_video (cpu);
 #define SLEEP(x) usleep ((unsigned) x * 1000)

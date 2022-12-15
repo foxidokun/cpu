@@ -1,3 +1,4 @@
+#include "config.h"
 #include "cpu_defines.h"
 
 #ifndef CMD_DEF
@@ -42,12 +43,13 @@
         PUSH_DATA (&OP1);                   \
     }, 0)                                   \
 
-#define _CMD_DEF_ARTHM(name, number, oper, check) \
+#define _CMD_DEF_ARTHM(name, number, oper, check, post_code) \
     CMD_DEF (name, number, {                      \
         POP_DATA (&OP2);                          \
         POP_DATA (&OP1);                          \
         {check};                                  \
         OP1 = OP1 oper OP2;                       \
+        {post_code};                              \
         PUSH_DATA (&OP1);                         \
     }, 0)                                         \
 
@@ -92,23 +94,25 @@ CMD_DEF (pop,  2, {
 
 // -----------------------------------------
 
-_CMD_DEF_ARTHM (add, 3, +, ;)
-_CMD_DEF_ARTHM (sub, 4, -, ;)
-_CMD_DEF_ARTHM (mul, 6, *, ;)
+_CMD_DEF_ARTHM (add, 3, +, ;, ;)
+_CMD_DEF_ARTHM (sub, 4, -, ;, ;)
+_CMD_DEF_ARTHM (mul, 6, *, ;, {OP1 = OP1 / PRECISION; })
 
 _CMD_DEF_ARTHM (div, 5, /, {
     if (OP2 == 0) {
         log (log::ERR, "Zero division error");
         ZERODIV();
     }
-})
 
-_CMD_DEF_ONE_OP (inc, 7,  ++)
-_CMD_DEF_ONE_OP (dec, 8,  --)
+    OP1 = OP1 * PRECISION;
+}, {;})
 
-_CMD_DEF_ONE_OP (zxc, 18, -7 + )
+_CMD_DEF_ONE_OP (inc, 7,  PRECISION +)
+_CMD_DEF_ONE_OP (dec, 8,  PRECISION +)
 
-_CMD_DEF_ONE_OP (sqrt, 22, SQRT)
+_CMD_DEF_ONE_OP (zxc, 18, -7*PRECISION + )
+
+_CMD_DEF_ONE_OP (sqrt, 22, SQRT(PRECISION) * SQRT)
 
 // -----------------------------------------
 
@@ -119,6 +123,7 @@ CMD_DEF (out, 9, {
 
 CMD_DEF (inp, 10, {
     INP  (OP1);
+    OP1 = OP1 * PRECISION;
     PUSH_DATA (&OP1);
 }, 0)
 
