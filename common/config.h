@@ -16,6 +16,8 @@ const size_t MAX_LABEL_LEN         = 64 + 1; // 30 for word and one for ':'
 const size_t MAX_ASM_LINE_LEN      = 128;
 const size_t LABEL_START_CAPACITY  = 16;
 
+const int PRECISION                = 100; 
+
 const unsigned int BAD_JMP_ADDR = -1u;
 
 const int VRAM_WIDTH       = 640;

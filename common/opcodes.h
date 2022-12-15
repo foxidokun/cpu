@@ -1,3 +1,4 @@
+#include "config.h"
 #include "cpu_defines.h"
 
 #ifndef CMD_DEF
@@ -59,7 +60,7 @@
         OP2 = GET_ARG ();                   \
         if (OP1)                            \
         {                                   \
-            JMP (OP2);                      \
+            JMP (OP2 / PRECISION);          \
         }                                   \
     }, 1)                                   \
 
@@ -75,7 +76,7 @@ CMD_DEF (dump, 21, {
 
 // -----------------------------------------
 
-CMD_DEF (push, 1, { OP1 = GET_ARG (); PUSH_DATA (&OP1); }, 1)
+CMD_DEF (push, 1, { OP1 = GET_ARG () * PRECISION; PUSH_DATA (&OP1); }, 1)
 
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();
@@ -94,21 +95,23 @@ CMD_DEF (pop,  2, {
 
 _CMD_DEF_ARTHM (add, 3, +, ;)
 _CMD_DEF_ARTHM (sub, 4, -, ;)
-_CMD_DEF_ARTHM (mul, 6, *, ;)
+_CMD_DEF_ARTHM (mul, 6, *, {OP1 /= SQRT (PRECISION); OP2 /= SQRT (PRECISION);})
 
 _CMD_DEF_ARTHM (div, 5, /, {
     if (OP2 == 0) {
         log (log::ERR, "Zero division error");
         ZERODIV();
     }
+
+    OP1 *= PRECISION;
 })
 
-_CMD_DEF_ONE_OP (inc, 7,  ++)
-_CMD_DEF_ONE_OP (dec, 8,  --)
+_CMD_DEF_ONE_OP (inc, 7,  PRECISION + )
+_CMD_DEF_ONE_OP (dec, 8,  PRECISION + )
 
-_CMD_DEF_ONE_OP (zxc, 18, -7 + )
+_CMD_DEF_ONE_OP (zxc, 18, -7 * PRECISION + PRECISION * )
 
-_CMD_DEF_ONE_OP (sqrt, 22, SQRT)
+_CMD_DEF_ONE_OP (sqrt, 22, SQRT(PRECISION) * SQRT)
 
 // -----------------------------------------
 
@@ -119,6 +122,7 @@ CMD_DEF (out, 9, {
 
 CMD_DEF (inp, 10, {
     INP  (OP1);
+    OP1 = PRECISION * OP1;
     PUSH_DATA (&OP1);
 }, 0)
 
@@ -126,7 +130,7 @@ CMD_DEF (inp, 10, {
 // -----------------------------------------
 
 CMD_DEF (jmp, 11, {
-    JMP (GET_ARG ());
+    JMP (GET_ARG () / PRECISION);
 }, 1)
 
 _CMD_DEF_JMP_IF (ja,  12, > )
@@ -153,5 +157,5 @@ CMD_DEF (ret, 20, {
 CMD_DEF (sleep, 24, 
 {
     POP_DATA (&OP1);
-    SLEEP (OP1);
+    SLEEP (OP1 / PRECISION);
 }, 0)
