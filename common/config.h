@@ -24,6 +24,6 @@ const int RECT_SIZE        =   1;
 const int PURE_RAM         = 5000;
 const int TOTAL_RAM_SIZE   = VRAM_WIDTH * VRAM_HEIGHT + PURE_RAM;
 
-const int PRECISION = 1;
+const int PRECISION = 100;
 
 #endif

@@ -92,8 +92,6 @@ int extract_arg (cpu_t *cpu, const opcode_t *const instruct)
         arg = cpu->ram[arg / PRECISION];
     }
 
-    log (log::ERR, "Got arg = %d", arg);
-
     return arg;
 }
 

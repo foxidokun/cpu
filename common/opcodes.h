@@ -77,7 +77,7 @@ CMD_DEF (dump, 21, {
 
 // -----------------------------------------
 
-CMD_DEF (push, 1, { OP1 = GET_ARG (); log(log::ERR, "About to push %d", OP1); PUSH_DATA (&OP1); }, 1)
+CMD_DEF (push, 1, { OP1 = GET_ARG (); PUSH_DATA (&OP1); }, 1)
 
 CMD_DEF (pop,  2, {
     OPPTR = GET_ARG_POP ();

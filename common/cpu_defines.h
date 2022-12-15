@@ -24,15 +24,15 @@
 #define OPPTR       op_ptr
 #define CURRENT_POS cpu->in
 
-#define POP_DATA(arg)  _STK_UNWRAP(stack_pop  (&cpu->data_stk, arg)); log (log::ERR, "POP  DATA %d", *arg);
-#define POP_ADDR(arg)  _STK_UNWRAP(stack_pop  (&cpu->addr_stk, arg)); log (log::ERR, "POP  ADDR %d", *arg);
-#define PUSH_DATA(arg) _STK_UNWRAP(stack_push (&cpu->data_stk, arg)); log (log::ERR, "PUSH DATA %d", *arg);
-#define PUSH_ADDR(arg) _STK_UNWRAP(stack_push (&cpu->addr_stk, arg)); log (log::ERR, "PUSH ADDR %d", *arg);
+#define POP_DATA(arg)  _STK_UNWRAP(stack_pop  (&cpu->data_stk, arg))
+#define POP_ADDR(arg)  _STK_UNWRAP(stack_pop  (&cpu->addr_stk, arg))
+#define PUSH_DATA(arg) _STK_UNWRAP(stack_push (&cpu->data_stk, arg))
+#define PUSH_ADDR(arg) _STK_UNWRAP(stack_push (&cpu->addr_stk, arg))
 
 #define GET_ARG()     extract_arg     (cpu, instruct)
 #define GET_ARG_POP() extract_arg_pop (cpu, instruct)
 
-#define JMP(arg) cpu->in = (unsigned int) arg; log (log::ERR, "Jumping to %d", arg);
+#define JMP(arg) cpu->in = (unsigned int) arg
 
 #define ZERODIV()      return CPU_ERRORS::ZERO_DIV
 #define HLT()          return CPU_ERRORS::OK
@@ -47,7 +47,7 @@
         _Pragma("GCC diagnostic pop")                               
 
 #define INP(arg) printf ("INPUT: \n"); scanf ("%i", &arg)
-#define OUT(arg) printf ("OUTPUT: %i.%02i\n", arg / PRECISION, arg % PRECISION)
+#define OUT(arg) printf ("OUTPUT: %lg\n", (double) arg / (double) PRECISION)
 #define DUMP()   _CLEAR_SCREEN; dump_cpu     (cpu); _PAUSE;
 #define VIDEO()  render_video (cpu);
 #define SLEEP(x) usleep ((unsigned) x * 1000)
