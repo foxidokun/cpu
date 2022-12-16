@@ -114,6 +114,12 @@ _CMD_DEF_ONE_OP (zxc, 18, -7*PRECISION + )
 
 _CMD_DEF_ONE_OP (sqrt, 22, SQRT(PRECISION) * SQRT)
 
+CMD_DEF (sin, 25, {
+    POP_DATA  (&OP1);
+    OP1 = SIN (OP1);
+    PUSH_DATA (&OP1);
+}, 0) 
+
 // -----------------------------------------
 
 CMD_DEF (out, 9, {

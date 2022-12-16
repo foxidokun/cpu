@@ -38,6 +38,8 @@
 #define HLT()          return CPU_ERRORS::OK
 #define SYNTAX_ERROR() return CPU_ERRORS::SYNTAX
 
+#define SIN(x) (int) round((sin (((double) x) / PRECISION) * PRECISION))
+
 #define _CLEAR_SCREEN printf ("\033[2J")
 #define _PAUSE                                          \
         _Pragma("GCC diagnostic push")                  \
